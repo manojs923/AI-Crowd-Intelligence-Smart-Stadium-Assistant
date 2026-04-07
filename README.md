@@ -1,150 +1,79 @@
 # AI Crowd Intelligence & Smart Stadium Assistant
 
-An AI-powered system that predicts crowd behavior and provides real-time smart guidance to enhance stadium experience and safety.
+An AI-powered smart stadium prototype that predicts crowd behavior, estimates queue times, and guides fans with safer and faster movement recommendations.
 
-## Problem Statement
+## Overview
 
-Large-scale stadium venues often struggle with:
+Large stadium venues often face crowd congestion, long food stall queues, poor navigation, and delayed decision-making during high-pressure moments like halftime and post-match exit flow.
 
-- Crowd congestion at gates, corridors, and exits
-- Long waiting times at food stalls and restrooms
-- Lack of real-time coordination and guidance
-- Difficulty in navigation inside the stadium
+This project addresses that problem with a lightweight web app that simulates:
 
-These issues reduce user experience, safety, and operational efficiency.
+- crowd density across stadium zones
+- queue prediction for food stalls
+- least-crowded route suggestions
+- real-time alerts and guidance
+- an AI-style chat assistant for visitor questions
 
-## Solution Overview
+## Features
 
-This project proposes a lightweight AI-powered smart stadium assistant that:
+- Smart Navigation: Suggests routes to seats, food stalls, washrooms, and exits
+- Crowd Heatmap: Displays low, medium, and high-density stadium zones
+- Queue Prediction: Estimates waiting times for food stalls
+- Predictive Alerts: Adapts recommendations based on event phase
+- Chat Assistant: Answers common visitor questions with rule-based guidance
 
-- Predicts crowd behavior using simulated data
-- Recommends less crowded routes
-- Estimates queue times at stalls
-- Offers real-time alerts and guidance
-- Supports users through a chat-style AI assistant
+## Event Phases Simulated
 
-## Core Features
+- Pre-Match
+- First Half
+- Halftime
+- Second Half
+- Post-Match
 
-### 1. Smart Navigation
-
-- Interactive route guidance to seats, food stalls, washrooms, and exits
-- Suggests the least crowded path based on mock crowd conditions
-
-### 2. Crowd Heatmap
-
-- Displays high, medium, and low crowd zones
-- Uses simulated zone occupancy data
-
-### 3. Queue Prediction
-
-- Estimates waiting times at food stalls
-- Recommends better alternatives with shorter queues
-
-### 4. AI Chat Assistant
-
-Users can ask questions like:
-
-- Where is the nearest washroom?
-- Best time to get food?
-- What is the fastest exit?
-
-### 5. Predictive Suggestions
-
-- Forecasts crowd increase during phases like halftime or post-match
-- Encourages users to move before rush periods
-
-### 6. Real-Time Alerts
-
-- Congestion warnings
-- Better gate suggestions
-- Exit guidance
+The dashboard updates crowd levels, queue times, and suggestions based on the selected phase.
 
 ## Tech Stack
 
-- React.js
+- React
 - Vite
 - Tailwind CSS
-- JSON mock data
+- React Router
+- JSON mock datasets
 
 ## Project Structure
 
 ```text
-smart-stadium-ai/
-|-- src/
-|   |-- components/
-|   |   |-- ChatAssistant.jsx
-|   |   |-- Heatmap.jsx
-|   |   `-- Map.jsx
-|   |-- data/
-|   |   |-- crowdData.json
-|   |   `-- stallsData.json
-|   |-- pages/
-|   |   |-- Dashboard.jsx
-|   |   `-- Home.jsx
-|   |-- utils/
-|   |   |-- chat.js
-|   |   |-- prediction.js
-|   |   `-- routing.js
-|   |-- App.jsx
-|   |-- index.css
-|   `-- main.jsx
-|-- index.html
-|-- package.json
-|-- postcss.config.js
-|-- tailwind.config.js
-|-- vite.config.js
-`-- README.md
+src/
+|-- components/
+|   |-- ChatAssistant.jsx
+|   |-- Heatmap.jsx
+|   `-- Map.jsx
+|-- data/
+|   |-- crowdData.json
+|   `-- stallsData.json
+|-- pages/
+|   |-- Dashboard.jsx
+|   `-- Home.jsx
+|-- utils/
+|   |-- chat.js
+|   |-- prediction.js
+|   `-- routing.js
+|-- App.jsx
+|-- index.css
+`-- main.jsx
 ```
 
-## Team Roles
+## How It Works
 
-### Frontend Developer
-
-- Build the UI using React and Tailwind CSS
-- Create the home page, dashboard, map, and chat interface
-
-### Logic / AI Developer
-
-- Implement prediction logic
-- Build queue estimation and route suggestion logic
-- Handle assistant response rules
-
-### Data Manager
-
-- Create and maintain mock datasets
-- Simulate crowd conditions and queue states
-
-### Project Manager
-
-- Maintain documentation and README
-- Prepare final submission and presentation
-
-## Hackathon Rules
-
-- GitHub repository should be public
-- Use only one branch
-- Keep repository size below 1 MB
-- Maintain clean and readable code
-- Include a proper README
-
-## Assumptions
-
-- Crowd data is simulated
-- Stadium map is predefined
-- Users share location through the app
-- Queue time is estimated using average service time
-
-## Example Logic
+1. Mock crowd data is loaded from JSON files.
+2. The selected event phase changes crowd intensity using phase multipliers.
+3. Queue waiting time is estimated using:
 
 ```javascript
-waitTime = peopleInQueue * avgServiceTime;
+waitTime = queueLength * avgServiceTime;
 ```
 
-```javascript
-if (people > 50) level = 'High';
-else if (people > 20) level = 'Medium';
-else level = 'Low';
-```
+4. Route and assistant recommendations are generated from the adjusted crowd conditions.
 
 ## Getting Started
 
@@ -153,9 +82,30 @@ npm install
 npm run dev
 ```
 
-## Future Enhancements
+To create a production build:
 
-- Connect live crowd sensor or camera feeds
-- Add authentication and personalized seat details
-- Integrate map APIs such as Leaflet
-- Add multilingual assistant support
+```bash
+npm run build
+```
+
+## Current Status
+
+- Frontend prototype completed
+- Dashboard flow implemented
+- Mock AI guidance logic implemented
+- Project builds successfully
+
+## Future Improvements
+
+- Integrate live sensor or camera-based crowd inputs
+- Add real indoor maps with path visualization
+- Support multilingual chat responses
+- Add authentication and personalized seat information
+- Connect alerts to live event operations
+
+## Submission Notes
+
+- Public GitHub repository
+- Single `main` branch workflow
+- `node_modules` and `dist` are excluded from Git tracking
+- Tracked repository size is currently well below 1 MB
