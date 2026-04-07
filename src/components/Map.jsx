@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getBestRoute } from '../utils/routing';
 import { getCrowdLevel } from '../utils/prediction';
 
@@ -9,9 +9,14 @@ const destinations = [
   { key: 'exit', label: 'Fastest Exit' },
 ];
 
-export default function Map({ crowdZones, destination, onDestinationChange }) {
-  const route = getBestRoute(destination, crowdZones);
+export default function Map({ crowdZones, destination, onDestinationChange, userProfile }) {
+  const route = getBestRoute(destination, crowdZones, userProfile);
   const [selectedZone, setSelectedZone] = useState(crowdZones[0]?.zone ?? 'North Gate');
+
+  useEffect(() => {
+    setSelectedZone(route.recommendedZone);
+  }, [route.recommendedZone]);
+
   const activeZone = crowdZones.find((zone) => zone.zone === selectedZone) ?? crowdZones[0];
   const zoneWait = Math.max(2, Math.round((activeZone?.waitFactor ?? 1) * 10));
   const zoneRecommendation =
@@ -27,6 +32,9 @@ export default function Map({ crowdZones, destination, onDestinationChange }) {
           <h2 className="font-display text-2xl font-bold text-slate-950">
             Least crowded route guidance
           </h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Starting from {userProfile.gate}, optimized for {userProfile.seat} and {userProfile.goalLabel.toLowerCase()}.
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">

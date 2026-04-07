@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getAssistantReply } from '../utils/chat';
 
 const quickPrompts = [
@@ -8,34 +8,48 @@ const quickPrompts = [
   'Will crowd increase soon?',
 ];
 
-export default function ChatAssistant({ crowdZones, stalls, phase }) {
+export default function ChatAssistant({ crowdZones, stalls, phase, userProfile }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: 'Ask about routes, food waits, crowd surges, or exit guidance.',
+      text: userProfile
+        ? `Profile loaded for ${userProfile.gate}, ${userProfile.seat}, goal: ${userProfile.goalLabel}. Ask me for personalized guidance.`
+        : 'Ask about routes, food waits, crowd surges, or exit guidance.',
     },
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const timerRef = useRef(null);
+  const [timerId, setTimerId] = useState(null);
 
-  useEffect(() => () => clearTimeout(timerRef.current), []);
+  useEffect(() => {
+    setMessages([
+      {
+        role: 'assistant',
+        text: userProfile
+          ? `Profile loaded for ${userProfile.gate}, ${userProfile.seat}, goal: ${userProfile.goalLabel}. Ask me for personalized guidance.`
+          : 'Ask about routes, food waits, crowd surges, or exit guidance.',
+      },
+    ]);
+  }, [userProfile]);
+
+  useEffect(() => () => clearTimeout(timerId), [timerId]);
 
   const submitMessage = (prompt) => {
     const value = prompt ?? input;
 
     if (!value.trim() || isTyping) return;
 
-    const reply = getAssistantReply(value, crowdZones, stalls, phase);
+    const reply = getAssistantReply(value, crowdZones, stalls, phase, userProfile);
     setMessages((current) => [...current, { role: 'user', text: value }]);
     setInput('');
     setIsTyping(true);
 
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
+    clearTimeout(timerId);
+    const nextTimer = setTimeout(() => {
       setMessages((current) => [...current, { role: 'assistant', text: reply }]);
       setIsTyping(false);
     }, 700);
+    setTimerId(nextTimer);
   };
 
   return (
@@ -72,7 +86,9 @@ export default function ChatAssistant({ crowdZones, stalls, phase }) {
           <div className="mt-6 rounded-2xl bg-white/5 p-4">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Assistant Mode</p>
             <p className="mt-2 text-sm leading-7 text-slate-200">
-              Live reasoning blends crowd pressure, wait times, and phase timing.
+              {userProfile
+                ? `Personalizing responses from ${userProfile.gate} for ${userProfile.seat}.`
+                : 'Live reasoning blends crowd pressure, wait times, and phase timing.'}
             </p>
           </div>
         </div>

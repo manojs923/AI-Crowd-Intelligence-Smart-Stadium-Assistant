@@ -7,7 +7,7 @@ const features = [
   'AI chat assistant for instant venue guidance',
 ];
 
-export default function Home() {
+export default function Home({ userProfile }) {
   return (
     <div className="space-y-8 pb-8 pt-4">
       <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -25,29 +25,33 @@ export default function Home() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              to="/dashboard"
+              to="/entry"
               className="rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
-              Open Dashboard
+              Start Experience
             </Link>
-            <a
-              href="#overview"
+            <Link
+              to={userProfile ? '/dashboard' : '/entry'}
               className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
-              Project Overview
-            </a>
+              {userProfile ? 'Resume Dashboard' : 'Set Visitor Profile'}
+            </Link>
           </div>
         </div>
 
         <div className="grid gap-4">
           <div className="glass-card rounded-[28px] p-6 shadow-glow">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-orange-600">
-              One-Line Pitch
+              Entry Simulation
             </p>
             <p className="mt-3 text-xl font-bold leading-8 text-slate-900">
-              An AI-powered system that predicts crowd behavior and provides real-time
-              smart guidance to enhance stadium experience and safety.
+              Pick your gate, seat area, and goal to unlock personalized stadium guidance.
             </p>
+            {userProfile ? (
+              <div className="mt-4 rounded-2xl bg-slate-950 p-4 text-sm text-white">
+                Active profile: {userProfile.gate} | {userProfile.seat} | {userProfile.goalLabel}
+              </div>
+            ) : null}
           </div>
 
           <div className="glass-card rounded-[28px] p-6 shadow-glow">
