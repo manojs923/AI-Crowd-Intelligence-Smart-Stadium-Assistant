@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Stall A",
+    "type": "Burgers",
+    "zone": "Food Court",
+    "queueLength": 9,
+    "avgServiceTime": 1.6
+  },
+  {
+    "name": "Stall B",
+    "type": "Sandwiches",
+    "zone": "East Concourse",
+    "queueLength": 3,
+    "avgServiceTime": 1.5
+  },
+  {
+    "name": "Stall C",
+    "type": "Beverages",
+    "zone": "West Concourse",
+    "queueLength": 4,
+    "avgServiceTime": 1.1
+  },
+  {
+    "name": "Stall D",
+    "type": "Pizza",
+    "zone": "North Gate",
+    "queueLength": 8,
+    "avgServiceTime": 1.7
+  }
+]

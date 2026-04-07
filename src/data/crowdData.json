@@ -1,0 +1,44 @@
+[
+  {
+    "zone": "North Gate",
+    "people": 64,
+    "x": 18,
+    "y": 20,
+    "waitFactor": 1.4
+  },
+  {
+    "zone": "South Gate",
+    "people": 22,
+    "x": 52,
+    "y": 82,
+    "waitFactor": 0.7
+  },
+  {
+    "zone": "East Concourse",
+    "people": 48,
+    "x": 76,
+    "y": 42,
+    "waitFactor": 1.1
+  },
+  {
+    "zone": "West Concourse",
+    "people": 17,
+    "x": 22,
+    "y": 54,
+    "waitFactor": 0.6
+  },
+  {
+    "zone": "Food Court",
+    "people": 58,
+    "x": 58,
+    "y": 56,
+    "waitFactor": 1.3
+  },
+  {
+    "zone": "Lower Deck Exit",
+    "people": 36,
+    "x": 70,
+    "y": 78,
+    "waitFactor": 0.9
+  }
+]
