@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import ChatAssistant from '../components/ChatAssistant';
 import Heatmap from '../components/Heatmap';
 import Map from '../components/Map';
@@ -6,37 +6,78 @@ import crowdZones from '../data/crowdData.json';
 import stalls from '../data/stallsData.json';
 import {
   buildAlerts,
+  buildSmartSuggestions,
   estimateWaitTime,
+  getLiveStatus,
   getPhaseMultiplier,
+  getPhaseTheme,
   predictZoneTrend,
 } from '../utils/prediction';
 
 const phases = ['Pre-Match', 'First Half', 'Halftime', 'Second Half', 'Post-Match'];
+const insightTone = {
+  emerald: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+  sky: 'border-sky-200 bg-sky-50 text-sky-900',
+  rose: 'border-rose-200 bg-rose-50 text-rose-900',
+};
 
 export default function Dashboard() {
   const [phase, setPhase] = useState('Halftime');
   const [destination, setDestination] = useState('seat');
+  const theme = getPhaseTheme(phase);
 
-  const adjustedZones = crowdZones.map((zone) => ({
-    ...zone,
-    people: Math.round(zone.people * getPhaseMultiplier(phase)),
-  }));
+  const adjustedZones = useMemo(
+    () =>
+      crowdZones.map((zone) => ({
+        ...zone,
+        people: Math.round(zone.people * getPhaseMultiplier(phase)),
+      })),
+    [phase],
+  );
 
-  const queueCards = stalls.map((stall) => ({
-    ...stall,
-    waitTime: estimateWaitTime(
-      Math.round(stall.queueLength * getPhaseMultiplier(phase)),
-      stall.avgServiceTime,
-    ),
-  }));
+  const queueCards = useMemo(
+    () =>
+      stalls.map((stall) => ({
+        ...stall,
+        waitTime: estimateWaitTime(
+          Math.round(stall.queueLength * getPhaseMultiplier(phase)),
+          stall.avgServiceTime,
+        ),
+      })),
+    [phase],
+  );
 
   const alerts = buildAlerts(adjustedZones, queueCards, phase);
+  const smartSuggestions = buildSmartSuggestions(adjustedZones, queueCards, phase);
+  const liveStatus = getLiveStatus(adjustedZones, queueCards, phase);
 
   return (
     <div className="space-y-8 pb-10 pt-4">
+      <section
+        className={`glass-card overflow-hidden rounded-[32px] border border-white/70 bg-gradient-to-r ${theme.surface} p-5 shadow-glow`}
+      >
+        <div className="grid gap-3 lg:grid-cols-3">
+          <div className="rounded-[24px] bg-slate-950 px-5 py-4 text-white shadow-lg transition duration-500 hover:-translate-y-1">
+            <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Stadium Status</p>
+            <p className="mt-2 text-2xl font-bold">{liveStatus.status}</p>
+            <p className="mt-1 text-sm text-slate-300">Phase-aware crowd intensity</p>
+          </div>
+          <div className="rounded-[24px] bg-white/90 px-5 py-4 shadow-sm transition duration-500 hover:-translate-y-1">
+            <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Avg Wait Time</p>
+            <p className="mt-2 text-2xl font-bold text-slate-950">{liveStatus.averageWait} mins</p>
+            <p className="mt-1 text-sm text-slate-600">Live estimate across active stalls</p>
+          </div>
+          <div className="rounded-[24px] bg-white/90 px-5 py-4 shadow-sm transition duration-500 hover:-translate-y-1">
+            <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Alert</p>
+            <p className="mt-2 text-lg font-bold text-slate-950">{liveStatus.alert}</p>
+            <p className={`mt-1 text-sm font-semibold ${theme.accent}`}>Signal refreshed for {phase}</p>
+          </div>
+        </div>
+      </section>
+
       <section className="grid gap-6 lg:grid-cols-[1fr_0.75fr]">
         <div className="glass-card rounded-[32px] p-7 shadow-glow">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-700">
+          <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${theme.accent}`}>
             Live Dashboard
           </p>
           <h1 className="mt-3 font-display text-4xl font-extrabold leading-tight text-slate-950">
@@ -44,24 +85,32 @@ export default function Dashboard() {
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600">
             Switch the event phase to simulate changing traffic patterns and see how the
-            system adapts route guidance, queue estimates, and assistant responses.
+            system adapts route guidance, queue estimates, alerts, and assistant responses.
           </p>
         </div>
 
         <div className="glass-card rounded-[32px] p-6 shadow-glow">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-orange-600">
-            Event Phase
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${theme.accent}`}>
+                Event Phase
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-bold text-slate-950">Pulse Control</h2>
+            </div>
+            <span className={`rounded-full px-4 py-2 text-sm font-semibold ${theme.badge}`}>
+              {phase}
+            </span>
+          </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {phases.map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => setPhase(item)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition duration-300 ${
                   phase === item
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white text-slate-700 hover:bg-slate-50'
+                    ? theme.badge
+                    : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:bg-slate-50'
                 }`}
               >
                 {item}
@@ -77,24 +126,58 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
-        <Heatmap zones={adjustedZones} />
+      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="space-y-6">
+          <Heatmap zones={adjustedZones} phase={phase} />
+
+          <section className="glass-card rounded-[28px] p-6 shadow-glow">
+            <div className="mb-5">
+              <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${theme.accent}`}>
+                Smart Suggestions
+              </p>
+              <h2 className="font-display text-2xl font-bold text-slate-950">
+                What should you do now?
+              </h2>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {smartSuggestions.map((suggestion) => (
+                <div
+                  key={suggestion.title}
+                  className={`rounded-[24px] border p-4 transition duration-300 hover:-translate-y-1 ${insightTone[suggestion.tone]}`}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] opacity-70">
+                    Insight
+                  </p>
+                  <h3 className="mt-2 text-lg font-bold">{suggestion.title}</h3>
+                  <p className="mt-3 text-sm leading-7">{suggestion.action}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
         <section className="glass-card rounded-[28px] p-6 shadow-glow">
-          <div className="mb-5">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-orange-600">
-              Queue Prediction
-            </p>
-            <h2 className="font-display text-2xl font-bold text-slate-950">
-              Food stall waiting times
-            </h2>
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div>
+              <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${theme.accent}`}>
+                Queue Prediction
+              </p>
+              <h2 className="font-display text-2xl font-bold text-slate-950">
+                Food stall waiting times
+              </h2>
+            </div>
+            <div className={`rounded-full px-4 py-2 text-sm font-semibold ${theme.badge}`}>
+              Live Scan
+            </div>
           </div>
           <div className="space-y-3">
             {queueCards
+              .slice()
               .sort((a, b) => a.waitTime - b.waitTime)
               .map((stall) => (
                 <div
                   key={stall.name}
-                  className="rounded-2xl border border-slate-200 bg-white/85 p-4"
+                  className="rounded-2xl border border-slate-200 bg-white/85 p-4 transition duration-300 hover:-translate-y-1 hover:shadow-lg"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -111,7 +194,7 @@ export default function Dashboard() {
               ))}
           </div>
         </section>
-      </div>
+      </section>
 
       <Map
         crowdZones={adjustedZones}
@@ -133,7 +216,10 @@ export default function Dashboard() {
           </div>
           <div className="space-y-3">
             {alerts.map((alert) => (
-              <div key={alert} className="rounded-2xl border border-rose-100 bg-rose-50 p-4">
+              <div
+                key={alert}
+                className="rounded-2xl border border-rose-100 bg-rose-50 p-4 transition duration-300 hover:-translate-y-1"
+              >
                 <p className="text-sm font-medium leading-7 text-rose-900">{alert}</p>
               </div>
             ))}

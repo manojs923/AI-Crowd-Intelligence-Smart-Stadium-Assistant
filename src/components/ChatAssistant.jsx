@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getAssistantReply } from '../utils/chat';
 
 const quickPrompts = [
@@ -16,19 +16,26 @@ export default function ChatAssistant({ crowdZones, stalls, phase }) {
     },
   ]);
   const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   const submitMessage = (prompt) => {
     const value = prompt ?? input;
 
-    if (!value.trim()) return;
+    if (!value.trim() || isTyping) return;
 
     const reply = getAssistantReply(value, crowdZones, stalls, phase);
-    setMessages((current) => [
-      ...current,
-      { role: 'user', text: value },
-      { role: 'assistant', text: reply },
-    ]);
+    setMessages((current) => [...current, { role: 'user', text: value }]);
     setInput('');
+    setIsTyping(true);
+
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setMessages((current) => [...current, { role: 'assistant', text: reply }]);
+      setIsTyping(false);
+    }, 700);
   };
 
   return (
@@ -56,11 +63,17 @@ export default function ChatAssistant({ crowdZones, stalls, phase }) {
                 key={prompt}
                 type="button"
                 onClick={() => submitMessage(prompt)}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-left text-sm text-slate-100 transition hover:bg-white/10"
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-left text-sm text-slate-100 transition hover:-translate-y-0.5 hover:bg-white/10"
               >
                 {prompt}
               </button>
             ))}
+          </div>
+          <div className="mt-6 rounded-2xl bg-white/5 p-4">
+            <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Assistant Mode</p>
+            <p className="mt-2 text-sm leading-7 text-slate-200">
+              Live reasoning blends crowd pressure, wait times, and phase timing.
+            </p>
           </div>
         </div>
 
@@ -69,7 +82,7 @@ export default function ChatAssistant({ crowdZones, stalls, phase }) {
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
-                className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 ${
+                className={`chat-bubble max-w-[88%] rounded-3xl px-4 py-3 text-sm leading-6 shadow-sm ${
                   message.role === 'assistant'
                     ? 'bg-slate-100 text-slate-700'
                     : 'ml-auto bg-sky-500 text-white'
@@ -78,6 +91,18 @@ export default function ChatAssistant({ crowdZones, stalls, phase }) {
                 {message.text}
               </div>
             ))}
+            {isTyping ? (
+              <div className="chat-bubble max-w-[88%] rounded-3xl bg-slate-100 px-4 py-3 text-sm text-slate-600 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <span>AI is thinking</span>
+                  <span className="thinking-dots">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-4 flex gap-3">
@@ -95,7 +120,7 @@ export default function ChatAssistant({ crowdZones, stalls, phase }) {
             <button
               type="button"
               onClick={() => submitMessage()}
-              className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
             >
               Send
             </button>
