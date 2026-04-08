@@ -8,7 +8,14 @@ const quickPrompts = [
   'Will crowd increase soon?',
 ];
 
-export default function ChatAssistant({ crowdZones, stalls, phase, userProfile }) {
+export default function ChatAssistant({
+  crowdZones,
+  stalls,
+  phase,
+  userProfile,
+  isSheet = false,
+  onClose,
+}) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -53,24 +60,41 @@ export default function ChatAssistant({ crowdZones, stalls, phase, userProfile }
   };
 
   return (
-    <section className="glass-card rounded-[28px] p-6 shadow-glow">
-      <div className="mb-5 flex items-center justify-between gap-4">
+    <section
+      className={`glass-card ${
+        isSheet
+          ? 'rounded-t-[2rem] border-white/10 bg-slate-950/95 p-5 md:rounded-[2rem] md:p-6'
+          : 'rounded-[1.75rem] border-white/10 bg-white/5 p-5'
+      }`}
+    >
+      <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-600">
-            AI Chat Assistant
+          <p className="section-label text-[11px] font-semibold uppercase text-lime-300">
+            AI Match Assistant
           </p>
-          <h2 className="font-display text-2xl font-bold text-slate-950">
+          <h2 className="mt-2 font-display text-4xl uppercase leading-none text-white">
             Ask for live recommendations
           </h2>
         </div>
-        <div className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
-          Phase: {phase}
+        <div className="flex items-center gap-2">
+          <div className="rounded-full bg-lime-300 px-4 py-2 text-sm font-bold uppercase tracking-[0.1em] text-slate-950">
+            {phase}
+          </div>
+          {isSheet ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+            >
+              Close
+            </button>
+          ) : null}
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[0.78fr_1.22fr]">
-        <div className="rounded-[24px] border border-slate-200 bg-slate-950 p-5 text-white">
-          <p className="text-sm font-semibold text-slate-200">Try these prompts</p>
+      <div className={`grid gap-4 ${isSheet ? 'lg:grid-cols-[0.72fr_1.28fr]' : 'lg:grid-cols-[0.78fr_1.22fr]'}`}>
+        <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/75 p-5 text-white">
+          <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-200">Quick prompts</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {quickPrompts.map((prompt) => (
               <button
@@ -83,32 +107,32 @@ export default function ChatAssistant({ crowdZones, stalls, phase, userProfile }
               </button>
             ))}
           </div>
-          <div className="mt-6 rounded-2xl bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Assistant Mode</p>
-            <p className="mt-2 text-sm leading-7 text-slate-200">
+          <div className="mt-6 rounded-[1.25rem] border border-lime-300/10 bg-lime-300/10 p-4">
+            <p className="section-label text-[10px] font-semibold uppercase text-lime-200">Assistant mode</p>
+            <p className="mt-2 text-sm leading-6 text-slate-200">
               {userProfile
-                ? `Personalizing responses from ${userProfile.gate} for ${userProfile.seat}.`
-                : 'Live reasoning blends crowd pressure, wait times, and phase timing.'}
+                ? `Personalizing from ${userProfile.gate} for ${userProfile.seat}.`
+                : 'Live reasoning blends crowd pressure, queue times, and match phase.'}
             </p>
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-slate-200 bg-white/90 p-4">
-          <div className="flex max-h-[340px] flex-col gap-3 overflow-y-auto px-1 py-2">
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+          <div className={`flex flex-col gap-3 overflow-y-auto px-1 py-2 ${isSheet ? 'max-h-[24rem]' : 'max-h-[21rem]'}`}>
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
-                className={`chat-bubble max-w-[88%] rounded-3xl px-4 py-3 text-sm leading-6 shadow-sm ${
+                className={`chat-bubble max-w-[88%] rounded-[1.5rem] px-4 py-3 text-sm leading-6 shadow-sm ${
                   message.role === 'assistant'
-                    ? 'bg-slate-100 text-slate-700'
-                    : 'ml-auto bg-sky-500 text-white'
+                    ? 'bg-slate-100 text-slate-800'
+                    : 'ml-auto bg-lime-300 text-slate-950'
                 }`}
               >
                 {message.text}
               </div>
             ))}
             {isTyping ? (
-              <div className="chat-bubble max-w-[88%] rounded-3xl bg-slate-100 px-4 py-3 text-sm text-slate-600 shadow-sm">
+              <div className="chat-bubble max-w-[88%] rounded-[1.5rem] bg-slate-100 px-4 py-3 text-sm text-slate-600 shadow-sm">
                 <div className="flex items-center gap-2">
                   <span>AI is thinking</span>
                   <span className="thinking-dots">
@@ -131,12 +155,12 @@ export default function ChatAssistant({ crowdZones, stalls, phase, userProfile }
                 }
               }}
               placeholder="Ask something like 'Best time to get food?'"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none ring-0 transition placeholder:text-slate-400 focus:border-sky-400"
+              className="w-full rounded-[1.2rem] border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-lime-300"
             />
             <button
               type="button"
               onClick={() => submitMessage()}
-              className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
+              className="rounded-[1.2rem] bg-lime-300 px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-slate-950 transition hover:-translate-y-0.5"
             >
               Send
             </button>

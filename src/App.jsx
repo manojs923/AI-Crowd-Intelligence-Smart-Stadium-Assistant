@@ -36,31 +36,45 @@ export default function App() {
   }, [userProfile]);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-slate-900">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.16),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(249,115,22,0.18),_transparent_24%),linear-gradient(180deg,_#fffaf2_0%,_#f8fbff_48%,_#eff6ff_100%)]" />
-      <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-5">
-        <div>
-          <p className="font-display text-lg font-semibold tracking-wide text-slate-950">
-            Smart Stadium AI
-          </p>
-          <p className="text-sm text-slate-600">Crowd intelligence for safer events</p>
-        </div>
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-[var(--bg)] text-white">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(190,242,100,0.14),_transparent_22%),radial-gradient(circle_at_82%_12%,_rgba(249,115,22,0.16),_transparent_18%),linear-gradient(180deg,_rgba(8,16,31,0.94)_0%,_rgba(5,10,18,0.98)_100%)]" />
+        <div className="signal-grid absolute inset-x-0 top-0 h-[28rem] opacity-20" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent)]" />
+      </div>
+
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
+          <div className="min-w-0">
+            <p className="section-label text-[10px] font-semibold uppercase text-lime-300">
+              Matchday Navigator
+            </p>
+            <p className="font-display text-3xl leading-none text-white md:text-4xl">
+              Smart Stadium AI
+            </p>
+            <p className="text-xs text-slate-300 md:text-sm">
+              Live routing, queue control, and fan coordination
+            </p>
+          </div>
+
           {userProfile ? (
-            <div className="hidden rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 shadow-glow backdrop-blur md:block">
+            <div className="hidden rounded-full border border-lime-300/20 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 shadow-neon md:block">
               {userProfile.gate} | {userProfile.seat} | {userProfile.goalLabel}
             </div>
           ) : null}
-          <nav className="flex items-center gap-3 rounded-full border border-white/70 bg-white/70 p-2 shadow-glow backdrop-blur">
+        </div>
+
+        <div className="mx-auto w-full max-w-7xl px-4 pb-4 md:px-6">
+          <nav className="grid grid-cols-3 gap-2 rounded-[1.5rem] border border-white/10 bg-white/5 p-2 shadow-glow">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  `rounded-[1rem] px-3 py-3 text-center text-sm font-semibold uppercase tracking-[0.16em] transition ${
                     isActive
-                      ? 'bg-slate-950 text-white'
-                      : 'text-slate-700 hover:bg-slate-100'
+                      ? 'bg-lime-300 text-slate-950 shadow-neon'
+                      : 'text-slate-300 hover:bg-white/8 hover:text-white'
                   }`
                 }
               >
@@ -71,7 +85,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-6 pb-12">
+      <main className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 md:px-6 md:pb-14">
         <Routes>
           <Route path="/" element={<Home userProfile={userProfile} />} />
           <Route

@@ -14,22 +14,26 @@ const goalToDestination = {
 
 const destinationMap = {
   seat: {
-    title: 'Seat Route',
+    title: 'Smart Route (Simulated)',
     fallbackZone: 'West Concourse',
   },
   food: {
-    title: 'Food Route',
-    fallbackZone: 'West Concourse',
+    title: 'Crowd-Aware Food Path',
+    fallbackZone: 'Food Court',
   },
   washroom: {
-    title: 'Washroom Route',
+    title: 'Crowd-Aware Washroom Path',
     fallbackZone: 'East Concourse',
   },
   exit: {
-    title: 'Fastest Exit',
+    title: 'Smart Exit Recommendation',
     fallbackZone: 'South Gate',
   },
 };
+
+function dedupePath(path) {
+  return path.filter((zone, index) => zone && path.indexOf(zone) === index);
+}
 
 export function getGoalDestination(goal) {
   return goalToDestination[goal] ?? 'seat';
@@ -38,6 +42,7 @@ export function getGoalDestination(goal) {
 export function getBestRoute(destination, crowdZones, userProfile) {
   const template = destinationMap[destination] ?? destinationMap.seat;
   const calmestZone = [...crowdZones].sort((a, b) => a.people - b.people)[0];
+  const busiestZone = [...crowdZones].sort((a, b) => b.people - a.people)[0];
   const seatZone = userProfile?.seat ? seatZoneMap[userProfile.seat] : null;
   const preferredTarget = destination === 'seat' && seatZone ? seatZone : template.fallbackZone;
   const preferredZone = crowdZones.find((zone) => zone.zone === preferredTarget) ?? calmestZone;
@@ -62,9 +67,16 @@ export function getBestRoute(destination, crowdZones, userProfile) {
     ],
     exit: [
       `Return toward ${calmestZone.zone}`,
-      `Avoid the busiest gate cluster`,
+      `Avoid ${busiestZone.zone}`,
       'Exit using South Gate',
     ],
+  };
+
+  const pathZones = {
+    seat: dedupePath([startGate, calmestZone.zone, preferredZone.zone]),
+    food: dedupePath([startGate, calmestZone.zone, preferredZone.zone]),
+    washroom: dedupePath([seatZone ?? startGate, calmestZone.zone, preferredZone.zone]),
+    exit: dedupePath([seatZone ?? calmestZone.zone, calmestZone.zone, 'South Gate']),
   };
 
   return {
@@ -72,5 +84,6 @@ export function getBestRoute(destination, crowdZones, userProfile) {
     recommendedZone: preferredZone.zone,
     crowdLevel: getCrowdLevel(preferredZone.people),
     steps: stepSets[destination] ?? stepSets.seat,
+    pathZones: pathZones[destination] ?? pathZones.seat,
   };
 }

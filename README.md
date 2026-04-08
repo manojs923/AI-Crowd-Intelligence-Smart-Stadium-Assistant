@@ -16,11 +16,27 @@ This project addresses that problem with a lightweight web app that simulates:
 
 ## Features
 
-- Smart Navigation: Suggests routes to seats, food stalls, washrooms, and exits
+- Smart Navigation: Simulated crowd-aware routes to seats, food stalls, washrooms, and exits
 - Crowd Heatmap: Displays low, medium, and high-density stadium zones
 - Queue Prediction: Estimates waiting times for food stalls
 - Predictive Alerts: Adapts recommendations based on event phase
 - Chat Assistant: Answers common visitor questions with rule-based guidance
+
+## Prototype Scope
+
+What is built in this prototype:
+
+- fan profile flow based on gate, seat section, and goal
+- simulated crowd-aware routing recommendations
+- event-phase-based queue and congestion updates
+- live-style dashboard UI for matchday coordination
+
+What is not yet implemented in the prototype:
+
+- real Wi-Fi or Bluetooth indoor positioning
+- QR checkpoint infrastructure
+- live camera, sensor, or turnstile data integration
+- backend-driven routing engine with real venue telemetry
 
 ## Event Phases Simulated
 
@@ -75,6 +91,17 @@ waitTime = queueLength * avgServiceTime;
 
 4. Route and assistant recommendations are generated from the adjusted crowd conditions.
 
+## Real-World Implementation
+
+In a real stadium deployment, this prototype can be extended with:
+
+- indoor positioning through Wi-Fi triangulation and Bluetooth beacons
+- QR checkpoints for location correction in corridors, gates, and stands
+- real-time feeds from sensors, cameras, or entry systems
+- backend services for crowd analytics, prediction, and rerouting
+
+This makes the system suitable for near-accurate indoor guidance while keeping the same crowd-aware decision logic shown in the prototype.
+
 ## Getting Started
 
 ```bash
@@ -97,6 +124,7 @@ npm run build
 
 ## Future Improvements
 
+- Implement graph-based routing with A* or Dijkstra
 - Integrate live sensor or camera-based crowd inputs
 - Add real indoor maps with path visualization
 - Support multilingual chat responses

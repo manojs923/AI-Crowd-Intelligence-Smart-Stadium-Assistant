@@ -4,11 +4,12 @@ export default {
   theme: {
     extend: {
       boxShadow: {
-        glow: '0 20px 60px rgba(15, 23, 42, 0.16)',
+        glow: '0 24px 80px rgba(2, 6, 23, 0.36)',
+        neon: '0 0 0 1px rgba(255,255,255,0.06), 0 18px 50px rgba(34,197,94,0.18)',
       },
       fontFamily: {
-        display: ['Poppins', 'sans-serif'],
-        body: ['Manrope', 'sans-serif'],
+        display: ['Teko', 'sans-serif'],
+        body: ['Barlow', 'sans-serif'],
       },
     },
   },

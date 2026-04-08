@@ -7,13 +7,13 @@ export function getCrowdLevel(people) {
 export function getCrowdColor(level) {
   if (level === 'High') return 'bg-rose-500';
   if (level === 'Medium') return 'bg-amber-400';
-  return 'bg-emerald-500';
+  return 'bg-lime-400';
 }
 
 export function getCrowdTextColor(level) {
-  if (level === 'High') return 'text-rose-700';
-  if (level === 'Medium') return 'text-amber-700';
-  return 'text-emerald-700';
+  if (level === 'High') return 'text-rose-200';
+  if (level === 'Medium') return 'text-amber-200';
+  return 'text-lime-200';
 }
 
 export function estimateWaitTime(queueLength, avgServiceTime) {
@@ -34,11 +34,11 @@ export function getPhaseMultiplier(phase) {
 
 export function predictZoneTrend(zone, phase) {
   const phaseMessages = {
-    'Pre-Match': `Traffic is building around ${zone}. Arrive early to avoid a gate rush.`,
-    'First Half': `${zone} should remain stable for the next 10 minutes.`,
-    Halftime: `${zone} is likely to spike in the next 10 minutes as fans leave their seats.`,
-    'Second Half': `${zone} should ease slightly as attendees return to the stands.`,
-    'Post-Match': `${zone} will grow busy again as the crowd heads for exits.`,
+    'Pre-Match': `Traffic is building around ${zone}. Move early before the turnstile rush spikes.`,
+    'First Half': `${zone} should stay steady for the next 10 minutes with a smooth movement window.`,
+    Halftime: `${zone} is likely to surge in the next 10 minutes as fans break from the stands.`,
+    'Second Half': `${zone} should settle slightly as supporters head back to their seats.`,
+    'Post-Match': `${zone} will tighten again as the crowd streams toward the exits.`,
   };
 
   return phaseMessages[phase] ?? `${zone} is being monitored for crowd changes.`;
@@ -49,40 +49,45 @@ export function buildAlerts(crowdZones, stalls, phase) {
   const fastestStall = [...stalls].sort((a, b) => a.waitTime - b.waitTime)[0];
 
   return [
-    `${busiestZone.zone} is currently the busiest zone. Consider rerouting via a side corridor.`,
-    `${fastestStall.name} has the shortest estimated wait right now.`,
+    `${busiestZone.zone} is the busiest zone right now. Use a side corridor if you can.`,
+    `${fastestStall.name} is serving fastest with an estimated ${fastestStall.waitTime} minute wait.`,
     phase === 'Halftime'
-      ? 'Halftime surge expected. Grab food or visit restrooms now before the peak.'
-      : `Event phase: ${phase}. Recommendations are tuned for this time window.`,
+      ? 'Halftime surge rising. Food and washrooms will get busier in the next few minutes.'
+      : `Phase set to ${phase}. Guidance is tuned to this match window.`,
   ];
 }
 
 export function getPhaseTheme(phase) {
   const themes = {
     'Pre-Match': {
-      surface: 'from-emerald-100/90 via-white to-sky-100/80',
-      accent: 'text-emerald-700',
-      badge: 'bg-emerald-500 text-white',
+      surface: 'from-lime-400/20 via-white/5 to-cyan-400/10',
+      accent: 'text-lime-300',
+      badge: 'bg-lime-300 text-slate-950',
+      border: 'border-lime-300/20',
     },
     'First Half': {
-      surface: 'from-sky-100/90 via-white to-cyan-100/80',
-      accent: 'text-sky-700',
-      badge: 'bg-sky-500 text-white',
+      surface: 'from-sky-400/18 via-white/5 to-cyan-400/10',
+      accent: 'text-sky-300',
+      badge: 'bg-sky-400 text-slate-950',
+      border: 'border-sky-300/20',
     },
     Halftime: {
-      surface: 'from-amber-100/90 via-orange-50 to-rose-100/70',
-      accent: 'text-orange-700',
-      badge: 'bg-orange-500 text-white',
+      surface: 'from-amber-300/20 via-orange-400/10 to-rose-400/10',
+      accent: 'text-amber-200',
+      badge: 'bg-amber-300 text-slate-950',
+      border: 'border-amber-200/20',
     },
     'Second Half': {
-      surface: 'from-blue-100/90 via-white to-indigo-100/70',
-      accent: 'text-blue-700',
-      badge: 'bg-blue-600 text-white',
+      surface: 'from-indigo-400/20 via-sky-400/8 to-white/5',
+      accent: 'text-indigo-200',
+      badge: 'bg-indigo-300 text-slate-950',
+      border: 'border-indigo-200/20',
     },
     'Post-Match': {
-      surface: 'from-rose-100/90 via-orange-50 to-red-100/80',
-      accent: 'text-rose-700',
-      badge: 'bg-rose-600 text-white',
+      surface: 'from-rose-400/18 via-orange-400/10 to-white/5',
+      accent: 'text-rose-200',
+      badge: 'bg-rose-300 text-slate-950',
+      border: 'border-rose-200/20',
     },
   };
 
@@ -97,21 +102,21 @@ export function buildSmartSuggestions(crowdZones, stalls, phase) {
 
   return [
     {
-      title: 'Grab food now',
-      action: `${fastestStall.name} in ${fastestStall.zone} is the quickest option at ${fastestStall.waitTime} mins.`,
-      tone: 'emerald',
+      title: 'Fast snack run',
+      action: `${fastestStall.name} in ${fastestStall.zone} is the quickest option at ${fastestStall.waitTime} min.`,
+      tone: 'lime',
     },
     {
-      title: 'Use the calm lane',
-      action: `${calmestZone.zone} is the smoothest zone to move through with ${calmestZone.people} people.`,
+      title: 'Move through the calm lane',
+      action: `${calmestZone.zone} is the smoothest zone with only ${calmestZone.people} people detected.`,
       tone: 'sky',
     },
     {
       title: 'Avoid pressure buildup',
       action:
         phase === 'Post-Match'
-          ? `${busiestZone.zone} is surging again. Start exiting early through a side corridor.`
-          : `${busiestZone.zone} is the current hotspot. Delay that path until the next phase shift.`,
+          ? `${busiestZone.zone} is surging again. Start your exit through a side path now.`
+          : `${busiestZone.zone} is the hotspot. Delay that path until the next phase shift.`,
       tone: 'rose',
     },
   ];
@@ -128,7 +133,7 @@ export function getLiveStatus(crowdZones, stalls, phase) {
     averageWait,
     alert:
       phase === 'Halftime'
-        ? `${busiestZone.zone} congestion is rising fast.`
+        ? `${busiestZone.zone} congestion is climbing quickly.`
         : `${busiestZone.zone} remains the zone to watch.`,
   };
 }

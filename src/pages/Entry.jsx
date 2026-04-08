@@ -9,6 +9,8 @@ const goals = [
   { value: 'explore', label: 'Explore' },
 ];
 
+const setupSteps = ['Set Entry', 'Choose Goal', 'Follow Route'];
+
 export default function Entry({ userProfile, onStart }) {
   const navigate = useNavigate();
   const [gate, setGate] = useState(userProfile?.gate ?? gates[0]);
@@ -31,40 +33,59 @@ export default function Entry({ userProfile, onStart }) {
   };
 
   return (
-    <div className="space-y-8 pb-10 pt-4">
-      <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="glass-card rounded-[36px] p-8 shadow-glow">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-orange-600">
-            Enter Stadium Experience
+    <div className="space-y-6 pb-8 pt-2">
+      <section className="grid gap-5 xl:grid-cols-[0.92fr_1.08fr]">
+        <div className="stadium-panel rounded-[2rem] p-6 md:p-8">
+          <p className="section-label text-xs font-semibold uppercase text-orange-200">
+            Fan onboarding
           </p>
-          <h1 className="mt-4 max-w-3xl font-display text-4xl font-extrabold leading-tight text-slate-950 md:text-5xl">
-            Simulate a fan journey and personalize the AI assistant in seconds.
+          <h1 className="mt-4 font-display text-6xl uppercase leading-[0.92] text-white md:text-7xl">
+            Set the supporter profile in seconds.
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-            Choose a gate, seat area, and visitor goal. The dashboard will adapt route
-            suggestions, alerts, and chat recommendations using this simulated entry profile.
+          <p className="mt-4 max-w-2xl text-lg leading-7 text-slate-300">
+            Pick an entry gate, stand section, and intent so the dashboard can route, alert, and respond like a real matchday assistant.
           </p>
 
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {setupSteps.map((step, index) => (
+              <div
+                key={step}
+                className={`rounded-[1.25rem] border px-4 py-4 ${
+                  index === 0
+                    ? 'border-lime-300/20 bg-lime-300/10'
+                    : 'border-white/10 bg-white/5'
+                }`}
+              >
+                <p className="section-label text-[10px] font-semibold uppercase text-slate-400">
+                  Step {index + 1}
+                </p>
+                <p className="mt-2 text-base font-bold uppercase tracking-[0.06em] text-white">
+                  {step}
+                </p>
+              </div>
+            ))}
+          </div>
+
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-[24px] bg-white/90 p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Entry Gate</p>
-              <p className="mt-2 text-xl font-bold text-slate-950">{gate}</p>
+            <div className="score-panel rounded-[1.5rem] p-4">
+              <p className="section-label text-[10px] font-semibold uppercase text-lime-300">Gate</p>
+              <p className="mt-3 text-2xl font-bold text-white">{gate}</p>
             </div>
-            <div className="rounded-[24px] bg-white/90 p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Seat Area</p>
-              <p className="mt-2 text-xl font-bold text-slate-950">{seat}</p>
+            <div className="score-panel rounded-[1.5rem] p-4">
+              <p className="section-label text-[10px] font-semibold uppercase text-lime-300">Seat</p>
+              <p className="mt-3 text-2xl font-bold text-white">{seat}</p>
             </div>
-            <div className="rounded-[24px] bg-slate-950 p-4 text-white">
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Goal</p>
-              <p className="mt-2 text-xl font-bold">{selectedGoal.label}</p>
+            <div className="rounded-[1.5rem] border border-orange-300/20 bg-orange-400/10 p-4">
+              <p className="section-label text-[10px] font-semibold uppercase text-orange-200">Goal</p>
+              <p className="mt-3 text-2xl font-bold text-white">{selectedGoal.label}</p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass-card rounded-[36px] p-8 shadow-glow">
+        <form onSubmit={handleSubmit} className="glass-card rounded-[2rem] border-white/10 bg-white/5 p-6 md:p-8">
           <div className="space-y-6">
             <div>
-              <label className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-700">
+              <label className="section-label text-[11px] font-semibold uppercase text-sky-300">
                 Select Entry Gate
               </label>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -73,10 +94,10 @@ export default function Entry({ userProfile, onStart }) {
                     key={item}
                     type="button"
                     onClick={() => setGate(item)}
-                    className={`rounded-2xl border px-4 py-4 text-left text-sm font-semibold transition ${
+                    className={`rounded-[1.25rem] border px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.1em] transition ${
                       gate === item
-                        ? 'border-sky-500 bg-sky-50 text-sky-900'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        ? 'border-lime-300 bg-lime-300 text-slate-950 shadow-neon'
+                        : 'border-white/10 bg-slate-950/60 text-slate-200 hover:border-white/20 hover:bg-slate-900'
                     }`}
                   >
                     {item}
@@ -86,7 +107,7 @@ export default function Entry({ userProfile, onStart }) {
             </div>
 
             <div>
-              <label className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-700">
+              <label className="section-label text-[11px] font-semibold uppercase text-sky-300">
                 Select Seat Area
               </label>
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -95,10 +116,10 @@ export default function Entry({ userProfile, onStart }) {
                     key={item}
                     type="button"
                     onClick={() => setSeat(item)}
-                    className={`rounded-2xl border px-4 py-4 text-left text-sm font-semibold transition ${
+                    className={`rounded-[1.25rem] border px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.1em] transition ${
                       seat === item
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        ? 'border-sky-300 bg-sky-300 text-slate-950'
+                        : 'border-white/10 bg-slate-950/60 text-slate-200 hover:border-white/20 hover:bg-slate-900'
                     }`}
                   >
                     {item}
@@ -108,8 +129,8 @@ export default function Entry({ userProfile, onStart }) {
             </div>
 
             <div>
-              <label className="text-sm font-semibold uppercase tracking-[0.22em] text-rose-700">
-                Purpose
+              <label className="section-label text-[11px] font-semibold uppercase text-sky-300">
+                Match Goal
               </label>
               <div className="mt-3 grid gap-3">
                 {goals.map((item) => (
@@ -117,13 +138,13 @@ export default function Entry({ userProfile, onStart }) {
                     key={item.value}
                     type="button"
                     onClick={() => setGoal(item.value)}
-                    className={`rounded-2xl border px-4 py-4 text-left transition ${
+                    className={`rounded-[1.25rem] border px-4 py-4 text-left transition ${
                       goal === item.value
-                        ? 'border-rose-500 bg-rose-50 text-rose-900'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        ? 'border-orange-300 bg-orange-300 text-slate-950'
+                        : 'border-white/10 bg-slate-950/60 text-slate-200 hover:border-white/20 hover:bg-slate-900'
                     }`}
                   >
-                    <p className="text-sm font-semibold">{item.label}</p>
+                    <p className="text-sm font-semibold uppercase tracking-[0.1em]">{item.label}</p>
                   </button>
                 ))}
               </div>
@@ -131,9 +152,9 @@ export default function Entry({ userProfile, onStart }) {
 
             <button
               type="submit"
-              className="w-full rounded-2xl bg-slate-950 px-6 py-4 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="w-full rounded-[1.35rem] bg-lime-300 px-6 py-4 text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:-translate-y-0.5"
             >
-              Start Experience
+              Launch Dashboard
             </button>
           </div>
         </form>
