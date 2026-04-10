@@ -1,12 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { getBestRoute } from '../utils/routing';
 import { getCrowdColor, getCrowdLevel } from '../utils/prediction';
 
 const destinations = [
-  { key: 'seat', label: 'My Seat' },
-  { key: 'food', label: 'Food Stall' },
+  { key: 'seat', label: 'Seat' },
+  { key: 'food', label: 'Food' },
   { key: 'washroom', label: 'Washroom' },
-  { key: 'exit', label: 'Fastest Exit' },
+  { key: 'exit', label: 'Best Exit' },
+  { key: 'metro', label: 'Metro 🚇' },
+  { key: 'bus', label: 'Bus 🚌' },
+  { key: 'cab', label: 'Cab 🚖' },
+  { key: 'parking', label: 'Parking 🅿️' },
 ];
 
 const viewBoxWidth = 100;
@@ -26,8 +31,8 @@ function getPathDefinition(pathZones, crowdZones) {
   return resolvedZones.map((zone, index) => `${index === 0 ? 'M' : 'L'} ${toPoint(zone)}`).join(' ');
 }
 
-export default function Map({ crowdZones, destination, onDestinationChange, userProfile }) {
-  const route = getBestRoute(destination, crowdZones, userProfile);
+export default function Map({ crowdZones, destination, onDestinationChange, userProfile, navigationStatus, phase }) {
+  const route = getBestRoute(destination, crowdZones, userProfile, phase);
   const [selectedZone, setSelectedZone] = useState(crowdZones[0]?.zone ?? 'North Gate');
 
   useEffect(() => {
@@ -43,7 +48,18 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
     () => getPathDefinition(route.pathZones, crowdZones),
     [crowdZones, route.pathZones],
   );
+  
   const currentZone = crowdZones.find((zone) => zone.zone === userProfile.gate) ?? crowdZones[0];
+
+  // Logic for YOU indicator target position
+  const targetZoneName = (navigationStatus === 'navigating' || navigationStatus === 'rerouting') 
+     && route.pathZones.length > 1 
+       ? route.pathZones[1] // Move one step along the active path segments
+       : currentZone.zone;
+       
+  const targetZone = crowdZones.find((z) => z.zone === targetZoneName) ?? currentZone;
+  const dotTranslateX = targetZone.x - currentZone.x;
+  const dotTranslateY = targetZone.y - currentZone.y;
 
   return (
     <section className="glass-card rounded-[1.75rem] border-white/10 bg-white/5 p-5 shadow-glow">
@@ -85,12 +101,15 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(190,242,100,0.12),transparent_34%),radial-gradient(circle_at_80%_24%,rgba(56,189,248,0.12),transparent_18%)]" />
 
           <div className="relative z-10 mb-4 flex flex-wrap items-start justify-between gap-3">
-            <div className="rounded-[1rem] border border-lime-300/15 bg-lime-300/10 px-4 py-3">
-              <p className="section-label text-[10px] font-semibold uppercase text-lime-200">
+            <div className={`rounded-[1rem] border px-4 py-3 transition-colors duration-500 ${
+              navigationStatus === 'rerouting' ? 'border-amber-300/15 bg-amber-300/10' : 'border-lime-300/15 bg-lime-300/10'
+            }`}>
+              <p className={`section-label text-[10px] font-semibold uppercase ${navigationStatus === 'rerouting' ? 'text-amber-200' : 'text-lime-200'}`}>
                 Fastest recommendation
               </p>
               <p className="mt-2 text-lg font-bold text-white">{route.recommendedZone}</p>
               <p className="text-sm text-slate-200">{zoneWait} min movement window</p>
+              <p className={`mt-1 text-sm font-semibold ${navigationStatus === 'rerouting' ? 'text-amber-100' : 'text-lime-100'}`}>{route.walkTime} min walk time</p>
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-100">
@@ -108,6 +127,11 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
                   <stop offset="50%" stopColor="#bef264" stopOpacity="1" />
                   <stop offset="100%" stopColor="#22c55e" stopOpacity="0.25" />
                 </linearGradient>
+                <linearGradient id="routeGlowReroute" x1="0%" x2="100%" y1="0%" y2="0%">
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="#fbbf24" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#d97706" stopOpacity="0.3" />
+                </linearGradient>
                 <filter id="nodeGlow">
                   <feGaussianBlur stdDeviation="1.8" result="blur" />
                   <feMerge>
@@ -118,30 +142,59 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
               </defs>
 
               <rect x="4" y="4" width="92" height="92" rx="8" fill="none" stroke="rgba(255,255,255,0.15)" />
-              <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(255,255,255,0.15)" strokeWidth="0.4" />
-              <circle cx="50" cy="50" r="10" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="0.4" />
+              <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(255,255,255,0.05)" strokeWidth="0.4" />
+              <circle cx="50" cy="50" r="12" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.4" />
+
+              {/* Stadium Structural Boundary */}
+              <path
+                d="M 12,24 C 12,14 88,14 88,24 L 88,76 C 88,86 12,86 12,76 Z"
+                fill="rgba(255,255,255,0.02)"
+                stroke="rgba(255,255,255,0.1)"
+                strokeWidth="0.3"
+                strokeDasharray="1.5 1.5"
+              />
+              <text x="50" y="20" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="2.8" fontWeight="700" letterSpacing="0.2em">
+                STADIUM CONCOURSE
+              </text>
+              <text x="50" y="8" textAnchor="middle" fill="rgba(56,189,248,0.4)" fontSize="2.2" fontWeight="700" letterSpacing="0.1em">
+                CITY INFRASTRUCTURE
+              </text>
+              <text x="50" y="94" textAnchor="middle" fill="rgba(56,189,248,0.4)" fontSize="2.2" fontWeight="700" letterSpacing="0.1em">
+                CITY INFRASTRUCTURE
+              </text>
 
               {routePath ? (
                 <>
-                  <path d={routePath} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-                  <path
-                    id="routePath"
-                    d={routePath}
-                    fill="none"
-                    stroke="url(#routeGlow)"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="10 6"
-                  >
+                  <motion.path 
+                    initial={false}
+                    animate={{ d: routePath }}
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.08)" 
+                    strokeWidth="8" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    transition={{ duration: 0.6, ease: "easeInOut" }}
+                  />
+                    <motion.path
+                      id="routePath"
+                      initial={false}
+                      animate={{ d: routePath }}
+                      fill="none"
+                      stroke={navigationStatus === 'rerouting' ? "url(#routeGlowReroute)" : "url(#routeGlow)"}
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray={routePath.includes('M') ? "5 5" : "10 6"} // Fallback hack if we wanted dashed for outside, but since we rely on animated offset we leave array intact conceptually.
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                    >
                     <animate attributeName="stroke-dashoffset" from="0" to="-64" dur="2.4s" repeatCount="indefinite" />
-                  </path>
-                  <circle r="1.7" fill="#d9f99d" filter="url(#nodeGlow)">
+                  </motion.path>
+                  <circle r="1.7" fill={navigationStatus === 'rerouting' ? "#fcd34d" : "#d9f99d"} filter="url(#nodeGlow)">
                     <animateMotion dur="2.6s" repeatCount="indefinite" rotate="auto">
                       <mpath href="#routePath" />
                     </animateMotion>
                   </circle>
-                  <circle r="1.2" fill="#86efac" filter="url(#nodeGlow)">
+                  <circle r="1.2" fill={navigationStatus === 'rerouting' ? "#fbbf24" : "#86efac"} filter="url(#nodeGlow)">
                     <animateMotion dur="3.4s" repeatCount="indefinite" rotate="auto">
                       <mpath href="#routePath" />
                     </animateMotion>
@@ -150,7 +203,11 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
               ) : null}
 
               {currentZone ? (
-                <g>
+                <motion.g
+                  initial={false}
+                  animate={{ x: dotTranslateX, y: dotTranslateY }}
+                  transition={{ duration: 3.5, ease: "easeInOut" }}
+                >
                   <circle cx={currentZone.x} cy={currentZone.y} r="5.6" fill="#38bdf8" opacity="0.18">
                     <animate attributeName="r" values="4.8;6.8;4.8" dur="2.1s" repeatCount="indefinite" />
                   </circle>
@@ -158,11 +215,12 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
                   <text x={currentZone.x + 3} y={currentZone.y - 3} fill="#bae6fd" fontSize="3" fontWeight="700">
                     YOU
                   </text>
-                </g>
+                </motion.g>
               ) : null}
 
               {crowdZones.map((spot) => {
                 const isActive = activeZone?.zone === spot.zone;
+                const isOutside = spot.isOutside;
                 const level = getCrowdLevel(spot.people);
                 const crowdColorClass = getCrowdColor(level);
                 const fillColor =
@@ -179,28 +237,50 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
                     className="cursor-pointer transition-all duration-500"
                   >
                     <title>{`${spot.zone} - Crowd: ${level} - ${spot.people} people`}</title>
-                    <circle cx={spot.x} cy={spot.y} r="7" fill={fillColor} opacity="0.12">
-                      <animate attributeName="r" values="6;8.5;6" dur="2.4s" repeatCount="indefinite" />
+                    
+                    {/* Background Pulses */}
+                    <circle cx={spot.x} cy={spot.y} r={isOutside ? "6" : "7"} fill={fillColor} opacity="0.12">
+                      <animate attributeName="r" values={isOutside ? "5;7;5" : "6;8.5;6"} dur="2.4s" repeatCount="indefinite" />
                     </circle>
-                    <circle cx={spot.x} cy={spot.y} r="4.4" fill={fillColor} opacity="0.22">
-                      <animate attributeName="r" values="4;5.2;4" dur="2s" repeatCount="indefinite" />
+                    
+                    <circle cx={spot.x} cy={spot.y} r={isOutside ? "3.5" : "4.4"} fill={fillColor} opacity="0.22">
+                      <animate attributeName="r" values={isOutside ? "3;4.5;3" : "4;5.2;4"} dur="2s" repeatCount="indefinite" />
                     </circle>
-                    <circle
-                      cx={spot.x}
-                      cy={spot.y}
-                      r={isActive ? '2.8' : '2.2'}
-                      fill={isActive ? '#ffffff' : fillColor}
-                      style={{ filter: isActive ? 'drop-shadow(0 0 8px white)' : 'drop-shadow(0 0 6px rgba(255,255,255,0.35))' }}
-                    />
+
+                    {/* Central Node */}
+                    {isOutside ? (
+                      <rect
+                        x={spot.x - (isActive ? 2.8 : 2.2)}
+                        y={spot.y - (isActive ? 2.8 : 2.2)}
+                        width={isActive ? 5.6 : 4.4}
+                        height={isActive ? 5.6 : 4.4}
+                        rx="1"
+                        fill={isActive ? '#ffffff' : fillColor}
+                        stroke="#38bdf8"
+                        strokeWidth="0.6"
+                        strokeDasharray="1.5 1.5"
+                        style={{ filter: isActive ? 'drop-shadow(0 0 8px white)' : 'drop-shadow(0 0 6px rgba(56,189,248,0.5))' }}
+                      />
+                    ) : (
+                      <circle
+                        cx={spot.x}
+                        cy={spot.y}
+                        r={isActive ? '2.8' : '2.2'}
+                        fill={isActive ? '#ffffff' : fillColor}
+                        style={{ filter: isActive ? 'drop-shadow(0 0 8px white)' : 'drop-shadow(0 0 6px rgba(255,255,255,0.35))' }}
+                      />
+                    )}
+
+                    {/* Emoji rendering directly in the label to prevent node glitches */}
                     <text
                       x={spot.x}
-                      y={spot.y + 8}
+                      y={spot.y + 7.5}
                       textAnchor="middle"
-                      fill="#f8fafc"
-                      fontSize="3.1"
+                      fill={isOutside ? "#bae6fd" : "#f8fafc"}
+                      fontSize={isOutside ? "2.8" : "3.1"}
                       fontWeight="700"
                     >
-                      {spot.zone}
+                      {spot.icon ? `${spot.zone} ${spot.icon}` : spot.zone}
                     </text>
                   </g>
                 );
@@ -208,7 +288,7 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
             </svg>
 
             <div className="pointer-events-none absolute bottom-3 right-3 rounded-full border border-white/10 bg-slate-950/75 px-3 py-2 text-lg text-white">
-              ??
+              🕹️
             </div>
           </div>
         </div>
@@ -216,6 +296,15 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
         <div className="space-y-4">
           <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
             <h3 className="font-display text-3xl uppercase leading-none text-white">{route.title}</h3>
+            
+            {route.nudge && (
+              <div className="mt-3 mb-4 rounded-xl border border-lime-500/20 bg-lime-500/10 p-3">
+                 <p className="text-sm font-semibold text-lime-200 flex items-center gap-2">
+                   🧠 AI Insight: {route.nudge}
+                 </p>
+              </div>
+            )}
+            
             <p className="mt-2 text-sm text-slate-300">
               This prototype simulates indoor position and updates the path using live crowd conditions.
             </p>

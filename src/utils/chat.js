@@ -11,7 +11,7 @@ export function getAssistantReply(message, crowdZones, stalls, phase, userProfil
     : '';
 
   if (input.includes('washroom')) {
-    const route = getBestRoute('washroom', crowdZones, userProfile);
+    const route = getBestRoute('washroom', crowdZones, userProfile, phase);
     return `${intro}the best washroom route is ${route.steps.join(' -> ')}. ${route.recommendedZone} is currently ${route.crowdLevel.toLowerCase()} crowd.`;
   }
 
@@ -19,13 +19,28 @@ export function getAssistantReply(message, crowdZones, stalls, phase, userProfil
     return `${intro}${fastestStall.name} in ${fastestStall.zone} is your best food option right now with about ${fastestStall.waitTime} minutes of waiting time.`;
   }
 
-  if (input.includes('exit')) {
-    const route = getBestRoute('exit', crowdZones, userProfile);
-    return `${intro}the fastest exit recommendation is ${route.steps.join(' -> ')}. This avoids ${busiestZone.zone}, which is the busiest area.`;
+  if (input.includes('metro')) {
+    const route = getBestRoute('metro', crowdZones, userProfile, phase);
+    return `${intro}your best route to the Metro 🚇 is ${route.steps.join(' -> ')}. (Approx ${route.walkTime} min walk, balancing indoor and outdoor crowd levels).`;
+  }
+
+  if (input.includes('cab')) {
+    const route = getBestRoute('cab', crowdZones, userProfile, phase);
+    return `${intro}to reach the Cab Zone 🚖, take this path: ${route.steps.join(' -> ')}. (Approx ${route.walkTime} min walk).`;
+  }
+
+  if (input.includes('bus')) {
+    const route = getBestRoute('bus', crowdZones, userProfile, phase);
+    return `${intro}the smartest path to the Bus Stop 🚌 is ${route.steps.join(' -> ')}. (Approx ${route.walkTime} min walk).`;
+  }
+
+  if (input.includes('exit') || input.includes('leave') || input.includes('home')) {
+    const route = getBestRoute('exit', crowdZones, userProfile, phase);
+    return `${intro}your optimal exit route is ${route.steps.join(' -> ')}. This dynamically routes you away from both indoor bottlenecks and overcrowded outdoor streets!`;
   }
 
   if (input.includes('seat')) {
-    const route = getBestRoute('seat', crowdZones, userProfile);
+    const route = getBestRoute('seat', crowdZones, userProfile, phase);
     return `${intro}your seat route is ${route.steps.join(' -> ')}.`;
   }
 

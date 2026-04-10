@@ -12,8 +12,9 @@ import {
   getPhaseMultiplier,
   getPhaseTheme,
   predictZoneTrend,
+  generateFutureAlert,
 } from '../utils/prediction';
-import { getGoalDestination } from '../utils/routing';
+import { getGoalDestination, getBestRoute } from '../utils/routing';
 
 const phases = ['Pre-Match', 'First Half', 'Halftime', 'Second Half', 'Post-Match'];
 const insightTone = {
@@ -130,6 +131,20 @@ export default function Dashboard({ userProfile, onResetExperience }) {
 
   const bestChoice = queueChoices[0];
   const recommendedDestination = phase === 'Halftime' ? 'food' : 'seat';
+  const isTransportMode = ['exit', 'metro', 'cab', 'bus', 'parking'].includes(destination);
+  const currentRoute = getBestRoute(destination, adjustedZones, userProfile, phase);
+  const futureAlert = generateFutureAlert(adjustedZones, phase);
+
+  const transportChoices = useMemo(() => {
+    return adjustedZones.filter(z => z.isOutside).map(tz => {
+      const dist = Math.abs(tz.x - 50) + Math.abs(tz.y - 50); // mock distance logic
+      return {
+         ...tz,
+         distanceStr: `${dist * 10}m`,
+         status: tz.people < 30 ? '🟢' : tz.people < 60 ? '🟡' : '🔴',
+      }
+    });
+  }, [adjustedZones]);
   const actionCard =
     phase === 'Halftime'
       ? {
@@ -184,32 +199,55 @@ export default function Dashboard({ userProfile, onResetExperience }) {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-            <article className={`rounded-[1.8rem] border p-5 shadow-glow ${actionCard.tone}`}>
-              <p className="section-label text-[11px] font-semibold uppercase text-white/75">Do This Now</p>
-              <h1 className="mt-3 font-display text-6xl uppercase leading-[0.92] text-white md:text-7xl">
-                {actionCard.title}
-              </h1>
-              <p className="mt-4 text-lg font-semibold text-slate-100">{actionCard.detail}</p>
-              <p className="mt-2 text-sm font-bold uppercase tracking-[0.08em] text-white">{actionCard.urgency}</p>
-              <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-slate-950/35 p-4">
-                <p className="section-label text-[10px] font-semibold uppercase text-lime-200">AI Coach</p>
-                <p className="mt-2 text-sm text-slate-100">{actionCard.ai}</p>
+            <article className={`rounded-[1.8rem] border p-5 shadow-glow flex flex-col justify-between ${futureAlert ? 'border-rose-300/25 bg-rose-300/12' : actionCard.tone}`}>
+              <div>
+                {futureAlert ? (
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-[1rem] border border-rose-300/20 bg-rose-500/20 px-3 py-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-rose-200">⚠️ Future Alert</span>
+                  </div>
+                ) : (
+                  <p className="section-label text-[11px] font-semibold uppercase text-white/75">Do This Now</p>
+                )}
+                
+                <h1 className="mt-2 font-display text-5xl uppercase leading-[0.92] text-white md:text-6xl">
+                  {futureAlert ? `Move now -> ${futureAlert.action.replace('Move now via ', '')}` : actionCard.title}
+                </h1>
+                
+                {futureAlert ? (
+                  <p className="mt-3 text-lg font-bold text-rose-100">{futureAlert.message}</p>
+                ) : (
+                  <p className="mt-3 text-lg font-semibold text-slate-100">{actionCard.detail}</p>
+                )}
+                
+                <p className="mt-1 text-sm font-bold uppercase tracking-[0.08em] text-white">
+                  {futureAlert ? `${futureAlert.action} — ${futureAlert.nudge}` : actionCard.urgency}
+                </p>
               </div>
-              <div className="mt-5 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={handleStartNavigation}
-                  className="rounded-full bg-white px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-950"
-                >
-                  {navigationStatus === 'idle' ? 'Follow Route' : 'Navigating...'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsChatOpen(true)}
-                  className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                >
-                  Ask Why
-                </button>
+
+              <div>
+                {!futureAlert && (
+                  <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-slate-950/35 p-4">
+                    <p className="section-label text-[10px] font-semibold uppercase text-lime-200">AI Coach</p>
+                    <p className="mt-2 text-sm text-slate-100">{currentRoute.nudge || actionCard.ai}</p>
+                  </div>
+                )}
+                
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleStartNavigation}
+                    className="rounded-full bg-white px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-950"
+                  >
+                    {navigationStatus === 'idle' ? 'Follow Route' : 'Navigating...'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsChatOpen(true)}
+                    className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-white"
+                  >
+                    Ask Why
+                  </button>
+                </div>
               </div>
             </article>
 
@@ -245,55 +283,113 @@ export default function Dashboard({ userProfile, onResetExperience }) {
         destination={destination}
         onDestinationChange={setDestination}
         userProfile={userProfile}
+        navigationStatus={navigationStatus}
+        phase={phase}
       />
 
       <section className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
         <article className="glass-card rounded-[1.75rem] border-white/10 bg-white/5 p-5 shadow-glow">
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <div>
-              <p className={`section-label text-[11px] font-semibold uppercase ${theme.accent}`}>
-                Queue Decision
-              </p>
-              <h2 className="mt-2 font-display text-4xl uppercase leading-none text-white">
-                Best food option right now
-              </h2>
-            </div>
-            <div className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] ${theme.badge}`}>
-              Live Scan
-            </div>
-          </div>
-
-          <div className="mb-4 rounded-[1.25rem] border border-lime-300/20 bg-lime-300/10 p-4">
-            <p className="section-label text-[10px] font-semibold uppercase text-lime-200">Best choice</p>
-            <p className="mt-2 text-2xl font-bold text-white">{bestChoice.name}</p>
-            <p className="mt-2 text-sm text-slate-100">
-              {bestChoice.walkTime} min walk + {bestChoice.waitTime} min wait = {bestChoice.totalTime} min total
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {queueChoices.slice(0, 3).map((stall, index) => (
-              <div
-                key={stall.name}
-                className={`rounded-[1.25rem] border p-4 transition duration-300 hover:-translate-y-1 ${
-                  index === 0 ? 'border-lime-300/20 bg-lime-300/10' : 'border-white/10 bg-slate-950/60'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold uppercase tracking-[0.08em] text-white">{stall.name}</h3>
-                    <p className="text-sm text-slate-300">{stall.type} | {stall.zone}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.08em] text-slate-400">
-                      {stall.walkTime} min walk + {stall.waitTime} min wait
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-white px-3 py-1 text-sm font-bold uppercase tracking-[0.08em] text-slate-950">
-                    {stall.totalTime} min
-                  </span>
+          {isTransportMode ? (
+            <>
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <p className="section-label text-[11px] font-semibold uppercase text-sky-300">
+                    Exit & Transport
+                  </p>
+                  <h2 className="mt-2 font-display text-4xl uppercase leading-none text-white">
+                    End-to-End Flow
+                  </h2>
+                </div>
+                <div className="rounded-full px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] bg-sky-300 text-slate-950">
+                  Live View
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="mb-4 rounded-[1.25rem] border border-sky-300/20 bg-sky-300/10 p-4">
+                <p className="section-label text-[10px] font-semibold uppercase text-sky-200">Best Exit Route</p>
+                <p className="mt-2 text-2xl font-bold text-white">🚪 {currentRoute.recommendedZone}</p>
+                <p className="mt-2 text-sm text-slate-100">
+                  ⏱ Time: {currentRoute.walkTime} min
+                </p>
+                {currentRoute.nudge && (
+                  <div className="mt-3 rounded-lg bg-slate-950/50 p-2 border border-sky-500/30">
+                    <p className="text-xs font-semibold text-sky-300 flex items-center gap-2">
+                       💡 {currentRoute.nudge}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {transportChoices.map((transport, index) => (
+                  <div
+                    key={transport.zone}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-[1.25rem] border border-white/10 bg-slate-950/60 p-4 transition duration-300 hover:-translate-y-1"
+                  >
+                    <div>
+                      <h3 className="font-semibold uppercase tracking-[0.08em] text-white">
+                        {transport.icon} {transport.zone}
+                      </h3>
+                      <p className="mt-1 text-xs uppercase tracking-[0.08em] text-slate-400">
+                        {transport.distanceStr} away
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-bold uppercase tracking-[0.08em] text-white">
+                      {transport.status} {transport.people < 30 ? 'Low Flow' : transport.people < 60 ? 'Busy' : 'Overloaded'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <p className={`section-label text-[11px] font-semibold uppercase ${theme.accent}`}>
+                    Queue Decision
+                  </p>
+                  <h2 className="mt-2 font-display text-4xl uppercase leading-none text-white">
+                    Best food option right now
+                  </h2>
+                </div>
+                <div className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] ${theme.badge}`}>
+                  Live Scan
+                </div>
+              </div>
+
+              <div className="mb-4 rounded-[1.25rem] border border-lime-300/20 bg-lime-300/10 p-4">
+                <p className="section-label text-[10px] font-semibold uppercase text-lime-200">Best choice</p>
+                <p className="mt-2 text-2xl font-bold text-white">{bestChoice.name}</p>
+                <p className="mt-2 text-sm text-slate-100">
+                  {bestChoice.walkTime} min walk + {bestChoice.waitTime} min wait = {bestChoice.totalTime} min total
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {queueChoices.slice(0, 3).map((stall, index) => (
+                  <div
+                    key={stall.name}
+                    className={`rounded-[1.25rem] border p-4 transition duration-300 hover:-translate-y-1 ${
+                      index === 0 ? 'border-lime-300/20 bg-lime-300/10' : 'border-white/10 bg-slate-950/60'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold uppercase tracking-[0.08em] text-white">{stall.name}</h3>
+                        <p className="text-sm text-slate-300">{stall.type} | {stall.zone}</p>
+                        <p className="mt-2 text-xs uppercase tracking-[0.08em] text-slate-400">
+                          {stall.walkTime} min walk + {stall.waitTime} min wait
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1 text-sm font-bold uppercase tracking-[0.08em] text-slate-950">
+                        {stall.totalTime} min
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </article>
 
         <article className="glass-card rounded-[1.75rem] border-white/10 bg-white/5 p-5 shadow-glow">
