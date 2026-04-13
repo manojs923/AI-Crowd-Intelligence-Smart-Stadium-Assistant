@@ -58,6 +58,16 @@ export default function Home({ userProfile }) {
                 {userProfile ? 'Resume Live Dashboard' : 'Set Fan Profile'}
               </Link>
             </div>
+            
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/ops"
+                target="_blank"
+                className="flex-1 rounded-[1.25rem] border-2 border-rose-500/50 bg-rose-500/10 px-6 py-4 text-center text-sm font-bold uppercase tracking-[0.18em] text-rose-400 transition hover:bg-rose-500/20"
+              >
+                🛡️ For Judges: Open Operations Command Center
+              </Link>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
