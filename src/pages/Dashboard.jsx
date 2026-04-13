@@ -15,6 +15,7 @@ import {
   generateFutureAlert,
 } from '../utils/prediction';
 import { getGoalDestination, getBestRoute } from '../utils/routing';
+import { useDemoState } from '../utils/demoState';
 
 const phases = ['Pre-Match', 'First Half', 'Halftime', 'Second Half', 'Post-Match'];
 const insightTone = {
@@ -36,7 +37,9 @@ function getWalkingMinutes(fromZone, toZone, zones) {
 }
 
 export default function Dashboard({ userProfile, onResetExperience }) {
-  const [phase, setPhase] = useState('Halftime');
+  const [demoState] = useDemoState();
+  const { phase, isEmergency, emergencyType } = demoState;
+
   const [accessibleMode, setAccessibleMode] = useState(false);
   const [destination, setDestination] = useState(getGoalDestination(userProfile?.goal));
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -48,8 +51,12 @@ export default function Dashboard({ userProfile, onResetExperience }) {
   const theme = getPhaseTheme(phase);
 
   useEffect(() => {
-    setDestination(getGoalDestination(userProfile?.goal));
-  }, [userProfile]);
+    if (isEmergency) {
+      setDestination('exit');
+    } else {
+      setDestination(getGoalDestination(userProfile?.goal));
+    }
+  }, [userProfile, isEmergency]);
 
   useEffect(() => {
     setIsRefreshing(true);
@@ -181,7 +188,16 @@ export default function Dashboard({ userProfile, onResetExperience }) {
 
   return (
     <div className="space-y-5 pb-12 pt-1 md:space-y-6">
-      <section className={`stadium-panel overflow-hidden rounded-[2rem] border ${theme.border} p-5 md:p-7`}>
+      {isEmergency && (
+        <section className="animate-pulse rounded-[1.5rem] border-2 border-red-500 bg-red-600/20 p-5 md:p-7 shadow-[0_0_50px_rgba(239,68,68,0.3)]">
+          <h2 className="text-4xl font-black uppercase tracking-widest text-red-50 font-display">🚨 {emergencyType}</h2>
+          <p className="mt-2 text-xl font-bold uppercase text-red-100/90 tracking-wide">
+             Evacuate immediately. <br className="hidden md:block" /> Follow the indicated exit route. Do not run. Follow staff instructions.
+          </p>
+        </section>
+      )}
+
+      <section className={`stadium-panel overflow-hidden rounded-[2rem] border ${isEmergency ? 'border-red-500 bg-red-950/40' : theme.border} p-5 md:p-7`}>
         <div className="relative z-10 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
@@ -294,9 +310,11 @@ export default function Dashboard({ userProfile, onResetExperience }) {
         userProfile={currentUserProfile}
         navigationStatus={navigationStatus}
         phase={phase}
+        isEmergency={isEmergency}
       />
 
-      <section className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
+      {!isEmergency && (
+        <section className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
         <article className="glass-card rounded-[1.75rem] border-white/10 bg-white/5 p-5 shadow-glow">
           {isTransportMode ? (
             <>
@@ -423,7 +441,9 @@ export default function Dashboard({ userProfile, onResetExperience }) {
           </div>
         </article>
       </section>
+      )}
 
+      {!isEmergency && (
       <section className="glass-card rounded-[1.75rem] border-white/10 bg-white/5 p-5 shadow-glow">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -451,23 +471,8 @@ export default function Dashboard({ userProfile, onResetExperience }) {
         {showAdvanced ? (
           <div className="mt-5 space-y-5">
             <article className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5">
-              <p className="section-label text-[11px] font-semibold uppercase text-sky-300">Simulation Control</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {phases.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setPhase(item)}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition ${
-                      phase === item
-                        ? theme.badge
-                        : 'bg-slate-900 text-slate-300 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              <p className="section-label text-[11px] font-semibold uppercase text-sky-300">Phase Information</p>
+              <p className="mt-2 text-lg text-slate-100">Live Phase: <span className="font-bold text-white uppercase">{phase}</span></p>
               <p className="mt-4 text-sm text-slate-300">{predictZoneTrend(adjustedZones[0].zone, phase)}</p>
             </article>
 
@@ -488,6 +493,7 @@ export default function Dashboard({ userProfile, onResetExperience }) {
           </div>
         ) : null}
       </section>
+      )}
 
       <button
         type="button"

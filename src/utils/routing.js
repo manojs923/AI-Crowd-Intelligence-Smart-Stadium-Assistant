@@ -185,7 +185,7 @@ export function getBestRoute(destination, crowdZones, userProfile, phase = 'Firs
     // targetNode dynamically calculates? Wait, for 'exit', since there are multiple exits
     // Dijkstra could target all exits and find minimum. 
     // Since we explicitly want best exit dynamically, we can loop over exits.
-    const validExits = ['North Gate', 'South Gate'];
+    const validExits = ['North Gate', 'South Gate', 'Lower Deck Exit'];
     let bestExitNode = validExits[0];
     let bestCost = Infinity;
 

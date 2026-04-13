@@ -31,7 +31,7 @@ function getPathDefinition(pathZones, crowdZones) {
   return resolvedZones.map((zone, index) => `${index === 0 ? 'M' : 'L'} ${toPoint(zone)}`).join(' ');
 }
 
-export default function Map({ crowdZones, destination, onDestinationChange, userProfile, navigationStatus, phase }) {
+export default function Map({ crowdZones, destination, onDestinationChange, userProfile, navigationStatus, phase, isEmergency }) {
   const route = getBestRoute(destination, crowdZones, userProfile, phase);
   const [selectedZone, setSelectedZone] = useState(crowdZones[0]?.zone ?? 'North Gate');
 
@@ -82,12 +82,13 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
             <button
               key={item.key}
               type="button"
+              disabled={isEmergency}
               onClick={() => onDestinationChange(item.key)}
               className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.1em] transition ${
                 destination === item.key
-                  ? 'bg-lime-300 text-slate-950'
+                  ? (isEmergency ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] border border-red-300' : 'bg-lime-300 text-slate-950')
                   : 'bg-slate-950/70 text-slate-300 hover:bg-white/10 hover:text-white'
-              }`}
+              } ${isEmergency && destination !== item.key ? 'opacity-30 cursor-not-allowed' : ''}`}
             >
               {item.label}
             </button>

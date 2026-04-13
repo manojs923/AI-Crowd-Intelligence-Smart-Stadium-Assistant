@@ -3,6 +3,7 @@ import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Entry from './pages/Entry';
+import OpsDashboard from './pages/OpsDashboard';
 
 const navItems = [
   { to: '/', label: 'Home' },
@@ -102,6 +103,7 @@ export default function App() {
               )
             }
           />
+          <Route path="/ops" element={<OpsDashboard />} />
         </Routes>
       </main>
     </div>
