@@ -102,14 +102,14 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
 
           <div className="relative z-10 mb-4 flex flex-wrap items-start justify-between gap-3">
             <div className={`rounded-[1rem] border px-4 py-3 transition-colors duration-500 ${
-              navigationStatus === 'rerouting' ? 'border-amber-300/15 bg-amber-300/10' : 'border-lime-300/15 bg-lime-300/10'
+              navigationStatus === 'rerouting' ? 'border-purple-500/25 bg-purple-500/10' : 'border-sky-400/25 bg-sky-400/10'
             }`}>
-              <p className={`section-label text-[10px] font-semibold uppercase ${navigationStatus === 'rerouting' ? 'text-amber-200' : 'text-lime-200'}`}>
+              <p className={`section-label text-[10px] font-semibold uppercase ${navigationStatus === 'rerouting' ? 'text-purple-300' : 'text-sky-300'}`}>
                 Fastest recommendation
               </p>
               <p className="mt-2 text-lg font-bold text-white">{route.recommendedZone}</p>
               <p className="text-sm text-slate-200">{zoneWait} min movement window</p>
-              <p className={`mt-1 text-sm font-semibold ${navigationStatus === 'rerouting' ? 'text-amber-100' : 'text-lime-100'}`}>{route.walkTime} min walk time</p>
+              <p className={`mt-1 text-sm font-semibold ${navigationStatus === 'rerouting' ? 'text-purple-200' : 'text-sky-200'}`}>{route.walkTime} min walk time</p>
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-100">
@@ -123,14 +123,14 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
             <svg viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} className="h-[380px] w-full">
               <defs>
                 <linearGradient id="routeGlow" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#84cc16" stopOpacity="0.25" />
-                  <stop offset="50%" stopColor="#bef264" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#22c55e" stopOpacity="0.25" />
+                  <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.25" />
+                  <stop offset="50%" stopColor="#38bdf8" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#0284c7" stopOpacity="0.25" />
                 </linearGradient>
                 <linearGradient id="routeGlowReroute" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
-                  <stop offset="50%" stopColor="#fbbf24" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#d97706" stopOpacity="0.3" />
+                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="#a78bfa" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.3" />
                 </linearGradient>
                 <filter id="nodeGlow">
                   <feGaussianBlur stdDeviation="1.8" result="blur" />
@@ -189,12 +189,12 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
                     >
                     <animate attributeName="stroke-dashoffset" from="0" to="-64" dur="2.4s" repeatCount="indefinite" />
                   </motion.path>
-                  <circle r="1.7" fill={navigationStatus === 'rerouting' ? "#fcd34d" : "#d9f99d"} filter="url(#nodeGlow)">
+                  <circle r="1.7" fill={navigationStatus === 'rerouting' ? "#c4b5fd" : "#bae6fd"} filter="url(#nodeGlow)">
                     <animateMotion dur="2.6s" repeatCount="indefinite" rotate="auto">
                       <mpath href="#routePath" />
                     </animateMotion>
                   </circle>
-                  <circle r="1.2" fill={navigationStatus === 'rerouting' ? "#fbbf24" : "#86efac"} filter="url(#nodeGlow)">
+                  <circle r="1.2" fill={navigationStatus === 'rerouting' ? "#a78bfa" : "#38bdf8"} filter="url(#nodeGlow)">
                     <animateMotion dur="3.4s" repeatCount="indefinite" rotate="auto">
                       <mpath href="#routePath" />
                     </animateMotion>

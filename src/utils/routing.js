@@ -225,10 +225,14 @@ export function getBestRoute(destination, crowdZones, userProfile, phase = 'Firs
   const destinationCrowdLevel = crowdZones.find(z => z.zone === recommendedZone)?.people ?? 0;
   const crowdLevelWord = getCrowdLevel(destinationCrowdLevel);
   const behavioralNudge = generateBehavioralNudge(pathZones, walkTime, crowdLevelWord);
+  
+  const displayZone = destination === 'seat' && userProfile?.seat 
+      ? `Seats: ${userProfile.seat} (near ${recommendedZone})` 
+      : recommendedZone;
 
   return {
     title: template.title,
-    recommendedZone,
+    recommendedZone: displayZone,
     crowdLevel: crowdLevelWord,
     steps,
     pathZones,

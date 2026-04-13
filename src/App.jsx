@@ -38,7 +38,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-white">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(190,242,100,0.14),_transparent_22%),radial-gradient(circle_at_82%_12%,_rgba(249,115,22,0.16),_transparent_18%),linear-gradient(180deg,_rgba(8,16,31,0.94)_0%,_rgba(5,10,18,0.98)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.14),_transparent_22%),radial-gradient(circle_at_82%_12%,_rgba(139,92,246,0.16),_transparent_18%),linear-gradient(180deg,_rgba(3,7,12,0.96)_0%,_rgba(1,2,4,0.99)_100%)]" />
         <div className="signal-grid absolute inset-x-0 top-0 h-[28rem] opacity-20" />
         <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent)]" />
       </div>

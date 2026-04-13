@@ -1,58 +1,57 @@
-import { buildAlerts, estimateWaitTime, getCrowdLevel, predictZoneTrend } from './prediction';
+import { GoogleGenAI } from '@google/genai';
+import { buildAlerts, predictZoneTrend } from './prediction';
 import { getBestRoute } from './routing';
 
-export function getAssistantReply(message, crowdZones, stalls, phase, userProfile) {
-  const input = message.toLowerCase();
-  const fastestStall = [...stalls].sort((a, b) => a.waitTime - b.waitTime)[0];
-  const calmestZone = [...crowdZones].sort((a, b) => a.people - b.people)[0];
-  const busiestZone = [...crowdZones].sort((a, b) => b.people - a.people)[0];
-  const intro = userProfile
-    ? `From ${userProfile.gate} near ${userProfile.seat}, `
-    : '';
+const ai = new GoogleGenAI({
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY
+});
 
-  if (input.includes('washroom')) {
-    const route = getBestRoute('washroom', crowdZones, userProfile, phase);
-    return `${intro}the best washroom route is ${route.steps.join(' -> ')}. ${route.recommendedZone} is currently ${route.crowdLevel.toLowerCase()} crowd.`;
+export async function getAssistantReply(message, crowdZones, stalls, phase, userProfile) {
+  try {
+    const fastestStall = [...stalls].sort((a, b) => a.waitTime - b.waitTime)[0];
+    const busiestZone = [...crowdZones].sort((a, b) => b.people - a.people)[0];
+    
+    // Evaluate standard routing internally dynamically
+    const washroomRoute = getBestRoute('washroom', crowdZones, userProfile, phase);
+    const exitRoute = getBestRoute('exit', crowdZones, userProfile, phase);
+    
+    const alerts = buildAlerts(crowdZones, stalls, phase);
+    const surgePrediction = predictZoneTrend(busiestZone.zone, phase);
+
+    let extraContext = '';
+    if (userProfile) {
+        extraContext = `User Location: Gate ${userProfile.gate}, Seat ${userProfile.seat}. Their main matchday goal: ${userProfile.goalLabel}.`;
+    }
+
+    const systemInstruction = `You are a highly intelligent Matchday Assistant for a Smart Stadium. Your goal is to guide fans safely and efficiently away from congestion.
+Be concise, helpful, friendly, and practical. Do not use overly formal language. Keep responses to 2-3 sentences max.
+
+Real-Time Stadium Context:
+- Current Match Phase: ${phase}
+- Live Crowd Alerts: ${alerts.join(' | ') || 'No current alerts'}
+- Future Crowd Surge Prediction: ${surgePrediction}
+- Fastest Food Option: ${fastestStall.name} in ${fastestStall.zone} (Approx ${fastestStall.waitTime} min wait)
+- Optimal dynamically-calculated Washroom Route for this user: ${washroomRoute.steps.join(' -> ')}
+- Optimal dynamically-calculated Exit/Street Route for this user: ${exitRoute.steps.join(' -> ')}
+
+${extraContext}
+
+When a user asks for directions (washrooms, exits, food), use the optimal routes provided above. When they ask about crowd size, warn them about the surge predictions.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: message,
+        config: {
+           systemInstruction: systemInstruction,
+           temperature: 0.7,
+        }
+    });
+
+    return response.text();
+
+  } catch (err) {
+    console.error("Gemini Error:", err);
+    return "I'm experiencing an AI core interruption at the moment. Please check the real-world live map on your dashboard to see routing details directly!";
   }
-
-  if (input.includes('food') || input.includes('stall')) {
-    return `${intro}${fastestStall.name} in ${fastestStall.zone} is your best food option right now with about ${fastestStall.waitTime} minutes of waiting time.`;
-  }
-
-  if (input.includes('metro')) {
-    const route = getBestRoute('metro', crowdZones, userProfile, phase);
-    return `${intro}your best route to the Metro 🚇 is ${route.steps.join(' -> ')}. (Approx ${route.walkTime} min walk, balancing indoor and outdoor crowd levels).`;
-  }
-
-  if (input.includes('cab')) {
-    const route = getBestRoute('cab', crowdZones, userProfile, phase);
-    return `${intro}to reach the Cab Zone 🚖, take this path: ${route.steps.join(' -> ')}. (Approx ${route.walkTime} min walk).`;
-  }
-
-  if (input.includes('bus')) {
-    const route = getBestRoute('bus', crowdZones, userProfile, phase);
-    return `${intro}the smartest path to the Bus Stop 🚌 is ${route.steps.join(' -> ')}. (Approx ${route.walkTime} min walk).`;
-  }
-
-  if (input.includes('exit') || input.includes('leave') || input.includes('home')) {
-    const route = getBestRoute('exit', crowdZones, userProfile, phase);
-    return `${intro}your optimal exit route is ${route.steps.join(' -> ')}. This dynamically routes you away from both indoor bottlenecks and overcrowded outdoor streets!`;
-  }
-
-  if (input.includes('seat')) {
-    const route = getBestRoute('seat', crowdZones, userProfile, phase);
-    return `${intro}your seat route is ${route.steps.join(' -> ')}.`;
-  }
-
-  if (input.includes('crowd') || input.includes('rush')) {
-    return `${intro}${predictZoneTrend(busiestZone.zone, phase)}`;
-  }
-
-  if (input.includes('alert')) {
-    return buildAlerts(crowdZones, stalls, phase).join(' ');
-  }
-
-  return `${intro}the calmest zone right now is ${calmestZone.zone} with ${getCrowdLevel(
-    calmestZone.people,
-  ).toLowerCase()} crowd. Ask me about food, washrooms, exits, or rush timing.`;
 }
+

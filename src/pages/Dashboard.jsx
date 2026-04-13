@@ -37,6 +37,7 @@ function getWalkingMinutes(fromZone, toZone, zones) {
 
 export default function Dashboard({ userProfile, onResetExperience }) {
   const [phase, setPhase] = useState('Halftime');
+  const [accessibleMode, setAccessibleMode] = useState(false);
   const [destination, setDestination] = useState(getGoalDestination(userProfile?.goal));
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -132,7 +133,8 @@ export default function Dashboard({ userProfile, onResetExperience }) {
   const bestChoice = queueChoices[0];
   const recommendedDestination = phase === 'Halftime' ? 'food' : 'seat';
   const isTransportMode = ['exit', 'metro', 'cab', 'bus', 'parking'].includes(destination);
-  const currentRoute = getBestRoute(destination, adjustedZones, userProfile, phase);
+  const currentUserProfile = useMemo(() => ({ ...userProfile, accessibleMode }), [userProfile, accessibleMode]);
+  const currentRoute = getBestRoute(destination, adjustedZones, currentUserProfile, phase);
   const futureAlert = generateFutureAlert(adjustedZones, phase);
 
   const transportChoices = useMemo(() => {
@@ -192,6 +194,13 @@ export default function Dashboard({ userProfile, onResetExperience }) {
               <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold uppercase tracking-[0.12em] text-slate-200">
                 Updated {secondsAgo}s ago
               </span>
+              <button
+                type="button"
+                onClick={() => setAccessibleMode(!accessibleMode)}
+                className={`rounded-full border px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] transition-all duration-300 ${accessibleMode ? 'border-sky-400 bg-sky-400/20 text-sky-200 shadow-[0_0_12px_rgba(56,189,248,0.4)]' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'}`}
+              >
+                ♿ Accessible Mode
+              </button>
             </div>
             <div className="rounded-full border border-sky-300/20 bg-sky-300/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-sky-100">
               {isRefreshing ? 'Recalculating...' : 'Live guidance on'}
@@ -282,7 +291,7 @@ export default function Dashboard({ userProfile, onResetExperience }) {
         crowdZones={adjustedZones}
         destination={destination}
         onDestinationChange={setDestination}
-        userProfile={userProfile}
+        userProfile={currentUserProfile}
         navigationStatus={navigationStatus}
         phase={phase}
       />

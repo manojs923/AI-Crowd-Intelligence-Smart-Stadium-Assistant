@@ -41,22 +41,19 @@ export default function ChatAssistant({
 
   useEffect(() => () => clearTimeout(timerId), [timerId]);
 
-  const submitMessage = (prompt) => {
+  const submitMessage = async (prompt) => {
     const value = prompt ?? input;
 
     if (!value.trim() || isTyping) return;
 
-    const reply = getAssistantReply(value, crowdZones, stalls, phase, userProfile);
     setMessages((current) => [...current, { role: 'user', text: value }]);
     setInput('');
     setIsTyping(true);
 
-    clearTimeout(timerId);
-    const nextTimer = setTimeout(() => {
-      setMessages((current) => [...current, { role: 'assistant', text: reply }]);
-      setIsTyping(false);
-    }, 700);
-    setTimerId(nextTimer);
+    const reply = await getAssistantReply(value, crowdZones, stalls, phase, userProfile);
+    
+    setMessages((current) => [...current, { role: 'assistant', text: reply }]);
+    setIsTyping(false);
   };
 
   return (
@@ -69,7 +66,7 @@ export default function ChatAssistant({
     >
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <p className="section-label text-[11px] font-semibold uppercase text-lime-300">
+          <p className="section-label text-[11px] font-semibold uppercase text-sky-400">
             AI Match Assistant
           </p>
           <h2 className="mt-2 font-display text-4xl uppercase leading-none text-white">
@@ -77,7 +74,7 @@ export default function ChatAssistant({
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <div className="rounded-full bg-lime-300 px-4 py-2 text-sm font-bold uppercase tracking-[0.1em] text-slate-950">
+          <div className="rounded-full bg-sky-400 px-4 py-2 text-sm font-bold uppercase tracking-[0.1em] text-slate-950 shadow-[0_0_12px_rgba(56,189,248,0.4)]">
             {phase}
           </div>
           {isSheet ? (
@@ -107,8 +104,8 @@ export default function ChatAssistant({
               </button>
             ))}
           </div>
-          <div className="mt-6 rounded-[1.25rem] border border-lime-300/10 bg-lime-300/10 p-4">
-            <p className="section-label text-[10px] font-semibold uppercase text-lime-200">Assistant mode</p>
+          <div className="mt-6 rounded-[1.25rem] border border-purple-400/20 bg-purple-400/10 p-4">
+            <p className="section-label text-[10px] font-semibold uppercase text-purple-300">Assistant mode</p>
             <p className="mt-2 text-sm leading-6 text-slate-200">
               {userProfile
                 ? `Personalizing from ${userProfile.gate} for ${userProfile.seat}.`
@@ -124,8 +121,8 @@ export default function ChatAssistant({
                 key={`${message.role}-${index}`}
                 className={`chat-bubble max-w-[88%] rounded-[1.5rem] px-4 py-3 text-sm leading-6 shadow-sm ${
                   message.role === 'assistant'
-                    ? 'bg-slate-100 text-slate-800'
-                    : 'ml-auto bg-lime-300 text-slate-950'
+                    ? 'bg-slate-800 text-slate-100 border border-white/10'
+                    : 'ml-auto bg-sky-400 text-slate-950 shadow-[0_0_10px_rgba(56,189,248,0.3)]'
                 }`}
               >
                 {message.text}
@@ -155,12 +152,12 @@ export default function ChatAssistant({
                 }
               }}
               placeholder="Ask something like 'Best time to get food?'"
-              className="w-full rounded-[1.2rem] border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-lime-300"
+              className="w-full rounded-[1.2rem] border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:shadow-[0_0_12px_rgba(56,189,248,0.2)]"
             />
             <button
               type="button"
               onClick={() => submitMessage()}
-              className="rounded-[1.2rem] bg-lime-300 px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-slate-950 transition hover:-translate-y-0.5"
+              className="rounded-[1.2rem] bg-sky-400 px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-slate-950 transition hover:-translate-y-0.5 shadow-[0_0_10px_rgba(56,189,248,0.3)]"
             >
               Send
             </button>
