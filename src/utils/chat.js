@@ -1,10 +1,8 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { buildAlerts, predictZoneTrend } from './prediction';
 import { getBestRoute } from './routing';
 
-const ai = new GoogleGenAI({
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 export async function getAssistantReply(message, crowdZones, stalls, phase, userProfile) {
   try {
@@ -38,20 +36,16 @@ ${extraContext}
 
 When a user asks for directions (washrooms, exits, food), use the optimal routes provided above. When they ask about crowd size, warn them about the surge predictions.`;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: message,
-        config: {
-           systemInstruction: systemInstruction,
-           temperature: 0.7,
-        }
+    const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        systemInstruction: systemInstruction 
     });
 
-    return response.text;
+    const result = await model.generateContent(message);
+    return result.response.text();
 
   } catch (err) {
     console.error("Gemini Error:", err);
     return "I'm experiencing an AI core interruption at the moment. Please check the real-world live map on your dashboard to see routing details directly!";
   }
 }
-
