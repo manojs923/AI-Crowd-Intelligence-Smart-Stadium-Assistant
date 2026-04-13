@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { getAssistantReply } from '../utils/chat';
+import { useEffect, useRef, useState } from 'react';
+import { buildWelcomeMessage, getAssistantReply } from '../utils/chat';
 
 const quickPrompts = [
   'Where is nearest washroom?',
@@ -16,30 +16,32 @@ export default function ChatAssistant({
   isSheet = false,
   onClose,
 }) {
+  const messageListRef = useRef(null);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: userProfile
-        ? `Profile loaded for ${userProfile.gate}, ${userProfile.seat}, goal: ${userProfile.goalLabel}. Ask me for personalized guidance.`
-        : 'Ask about routes, food waits, crowd surges, or exit guidance.',
+      text: buildWelcomeMessage(userProfile),
     },
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [timerId, setTimerId] = useState(null);
 
   useEffect(() => {
     setMessages([
       {
         role: 'assistant',
-        text: userProfile
-          ? `Profile loaded for ${userProfile.gate}, ${userProfile.seat}, goal: ${userProfile.goalLabel}. Ask me for personalized guidance.`
-          : 'Ask about routes, food waits, crowd surges, or exit guidance.',
+        text: buildWelcomeMessage(userProfile),
       },
     ]);
   }, [userProfile]);
 
-  useEffect(() => () => clearTimeout(timerId), [timerId]);
+  useEffect(() => {
+    const container = messageListRef.current;
+
+    if (!container) return;
+
+    container.scrollTop = container.scrollHeight;
+  }, [messages, isTyping]);
 
   const submitMessage = async (prompt) => {
     const value = prompt ?? input;
@@ -115,7 +117,10 @@ export default function ChatAssistant({
         </div>
 
         <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-          <div className={`flex flex-col gap-3 overflow-y-auto px-1 py-2 ${isSheet ? 'max-h-[24rem]' : 'max-h-[21rem]'}`}>
+          <div
+            ref={messageListRef}
+            className={`flex flex-col gap-3 overflow-y-auto px-1 py-2 ${isSheet ? 'max-h-[24rem]' : 'max-h-[21rem]'}`}
+          >
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
@@ -148,6 +153,7 @@ export default function ChatAssistant({
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
+                  event.preventDefault();
                   submitMessage();
                 }
               }}
