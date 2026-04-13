@@ -39,7 +39,7 @@ ${extraContext}
 When a user asks for directions (washrooms, exits, food), use the optimal routes provided above. When they ask about crowd size, warn them about the surge predictions.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: message,
         config: {
            systemInstruction: systemInstruction,
@@ -47,7 +47,7 @@ When a user asks for directions (washrooms, exits, food), use the optimal routes
         }
     });
 
-    return response.text();
+    return response.text;
 
   } catch (err) {
     console.error("Gemini Error:", err);
