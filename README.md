@@ -80,6 +80,12 @@ The routing system respects accessibility. When active, the pathfinding engine d
 The project helps fans move faster and enjoy the event more. Concurrently, it helps venue operators maintain operational clarity and respond more effectively during sudden crowd surges or emergency scenarios, ultimately improving venue safety response.
 
 ---
+### 💭 **Assumptions Made**
+- It is assumed that live production integration would utilize a high-density Stadium Wi-Fi system to avoid standard cellular dead zones.
+- Pathfinding algorithms assume attendees walk at a standard human speed (1.4 m/s) when not impacted by congestion matrices.
+- The entry gate and seating topology are based on a generalized oval stadium model (Section A-D, North/South exits).
+
+---
 ### 🚀 **Getting Started**
 Ensure you have created a `.env` file containing your Google Gemini API Key:
 ```text
