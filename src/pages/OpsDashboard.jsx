@@ -8,6 +8,19 @@ export default function OpsDashboard() {
   const [demoState, updateDemoState] = useDemoState();
   const { phase, isEmergency, emergencyType } = demoState;
 
+  const [secondsAgo, setSecondsAgo] = React.useState(0);
+  const [paxJitter, setPaxJitter] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsAgo((s) => (s > 4 ? 0 : s + 1));
+      if (Math.random() > 0.4) {
+        setPaxJitter(Math.floor(Math.random() * 7) - 3);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const handleTriggerEmergency = (type) => {
     updateDemoState({ isEmergency: true, emergencyType: type });
   };
@@ -24,19 +37,30 @@ export default function OpsDashboard() {
       </header>
 
       {isEmergency && (
-        <section className="animate-pulse rounded-[2rem] border-2 border-red-500 bg-red-500/20 p-6 shadow-[0_0_40px_rgba(239,68,68,0.4)]">
-          <h2 className="text-3xl font-bold uppercase tracking-widest text-red-100">
-            🚨 ACTIVE EMERGENCY: {emergencyType}
-          </h2>
-          <p className="mt-4 text-red-200">
-            All attendee devices have been forced into evacuation mode and locked to the safest nearest exits.
-          </p>
-          <button
-            onClick={clearEmergency}
-            className="mt-6 rounded-full bg-white px-6 py-3 text-sm font-bold uppercase tracking-widest text-red-600 transition hover:bg-red-50"
-          >
-            Resolve Emergency (Restore Normal Flow)
-          </button>
+        <section className="relative overflow-hidden rounded-[2rem] border-4 border-red-600 bg-red-950/80 p-8 shadow-[0_0_80px_rgba(239,68,68,0.5)] transition-all">
+          <div className="absolute inset-0 animate-pulse bg-red-500/10 pointer-events-none"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+              <h2 className="text-4xl font-black uppercase tracking-widest text-white drop-shadow-md">
+                🚨 CRITICAL EMERGENCY (LEVEL 3): {emergencyType}
+              </h2>
+              <div className="text-left md:text-right">
+                <span className="rounded bg-red-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-red-200">
+                  Last updated: 1 sec ago
+                </span>
+                <p className="mt-2 text-xs font-bold uppercase tracking-widest text-red-400">🤖 AI Coordinated Evacuation Active</p>
+              </div>
+            </div>
+            <p className="text-lg text-red-200 font-semibold tracking-wide">
+              All attendee devices have been forced into evacuation mode and locked to the safest nearest exits.
+            </p>
+            <button
+              onClick={clearEmergency}
+              className="mt-8 rounded-full bg-white px-8 py-4 text-sm font-bold uppercase tracking-widest text-red-700 transition-all hover:bg-slate-200 hover:scale-[1.02] active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+            >
+              Resolve Emergency (Restore Normal Flow)
+            </button>
+          </div>
         </section>
       )}
 
@@ -92,24 +116,36 @@ export default function OpsDashboard() {
       </section>
 
       <section className="glass-card rounded-[2rem] border-white/10 bg-black/40 p-6">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h3 className="text-xl font-bold uppercase tracking-widest text-white">Live Operations Map [Mock View]</h3>
-          <span className="rounded-full bg-lime-400/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-lime-300">Online</span>
+          <div className="flex items-center gap-4">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Last updated: {secondsAgo} sec ago</span>
+            <span className="animate-pulse rounded-full bg-lime-400/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-lime-300">Online</span>
+          </div>
         </div>
         
         {/* A simple visualization table to give a "Dashboard" feel in the demo */}
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {crowdZones.slice(0, 8).map(zone => (
-              <div key={zone.zone} className="rounded-xl border border-white/5 bg-white/5 p-4">
-                 <p className="text-xs uppercase tracking-wider text-slate-400">{zone.zone}</p>
-                 <p className="mt-2 text-2xl font-bold text-white">{zone.people} <span className="text-sm font-normal text-slate-500">PAX</span></p>
-                 {isEmergency ? (
-                    <div className="mt-2 text-[10px] font-bold text-red-400 uppercase">Evacuating</div>
-                 ) : (
-                    <div className="mt-2 text-[10px] uppercase text-sky-400">Normal Flow</div>
-                 )}
-              </div>
-            ))}
+            {crowdZones.slice(0, 8).map((zone, index) => {
+              const livePax = Math.max(0, zone.people + (index % 2 === 0 ? paxJitter : -paxJitter));
+              const isCritical = isEmergency && index === 2; // Making the 3rd zone (e.g., Section A) the critical one
+
+              return (
+                <div key={zone.zone} className={`rounded-[1.25rem] border p-4 transition-colors ${isCritical ? 'border-red-500 bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'border-white/5 bg-white/5'}`}>
+                   <p className={`text-[10px] font-bold uppercase tracking-widest ${isCritical ? 'text-red-200' : 'text-slate-400'}`}>{zone.zone}</p>
+                   <p className="mt-2 text-2xl font-bold text-white">{livePax} <span className="text-sm font-normal text-slate-500">PAX</span></p>
+                   {isEmergency ? (
+                      isCritical ? (
+                        <div className="mt-3 text-[10px] font-black tracking-widest text-white uppercase animate-pulse bg-red-600 rounded px-2 py-1 inline-block">CRITICAL → EVACUATE</div>
+                      ) : (
+                        <div className="mt-3 text-[10px] font-bold tracking-widest text-red-400 uppercase">EVACUATING</div>
+                      )
+                   ) : (
+                      <div className="mt-3 text-[10px] font-bold tracking-widest uppercase text-sky-400">Normal Flow</div>
+                   )}
+                </div>
+              );
+            })}
          </div>
       </section>
     </div>

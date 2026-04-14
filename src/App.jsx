@@ -58,11 +58,21 @@ export default function App() {
             </p>
           </div>
 
-          {userProfile ? (
-            <div className="hidden rounded-full border border-lime-300/20 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 shadow-neon md:block">
-              {userProfile.gate} | {userProfile.seat} | {userProfile.goalLabel}
-            </div>
-          ) : null}
+          <div className="flex items-center gap-3">
+            {userProfile ? (
+              <div className="hidden rounded-full border border-lime-300/20 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 shadow-neon md:block">
+                {userProfile.gate} | {userProfile.seat} | {userProfile.goalLabel}
+              </div>
+            ) : null}
+            
+            <NavLink
+              to="/ops"
+              target="_blank"
+              className="rounded-full border border-white/10 bg-slate-950/50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 transition hover:bg-white/10 hover:text-white md:px-4 md:py-2 md:text-xs"
+            >
+              Staff portal
+            </NavLink>
+          </div>
         </div>
 
         <div className="mx-auto w-full max-w-7xl px-4 pb-4 md:px-6">

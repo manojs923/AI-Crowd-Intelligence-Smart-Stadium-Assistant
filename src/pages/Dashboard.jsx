@@ -157,18 +157,20 @@ export default function Dashboard({ userProfile, onResetExperience }) {
   const actionCard =
     phase === 'Halftime'
       ? {
-          title: `Go now -> ${bestChoice.zone}`,
+          title: `MOVE NOW -> ${bestChoice.zone}`,
           detail: `${bestChoice.totalTime} min total | ${bestChoice.walkTime} min walk + ${bestChoice.waitTime} min wait`,
-          urgency: 'Go now - crowd increases in 3 mins',
-          ai: `AI says: ${bestChoice.name} is the quickest choice right now.`,
-          tone: 'border-amber-300/25 bg-amber-300/12',
+          urgency: '⚠️ Prediction: Crowd surge expected in 4 minutes',
+          ai: `✅ Recommendation: Take ${bestChoice.name} now to avoid the rush.`,
+          nextAction: `→ Grab food now (${bestChoice.waitTime} min wait)`,
+          tone: 'border-amber-400/50 bg-amber-400/10',
         }
       : {
-          title: `Go now -> ${calmestZone.zone}`,
+          title: `MOVE NOW -> ${calmestZone.zone}`,
           detail: `Low crowd route | ${getWalkingMinutes(userProfile.gate, calmestZone.zone, adjustedZones)} min walk`,
-          urgency: 'Go now - this is the calmest path',
-          ai: `AI says: use ${calmestZone.zone} before pressure builds near ${busiestZone.zone}.`,
-          tone: 'border-lime-300/25 bg-lime-300/10',
+          urgency: `⚠️ Prediction: Congestion spiking near ${busiestZone.zone}`,
+          ai: `✅ Recommendation: Use ${calmestZone.zone} for 40% faster movement.`,
+          nextAction: `→ Head to seat before match starts`,
+          tone: 'border-lime-400/50 bg-lime-400/10',
         };
 
   const primaryAlert = `${busiestZone.zone.toUpperCase()} OVERLOADED`;
@@ -189,10 +191,13 @@ export default function Dashboard({ userProfile, onResetExperience }) {
   return (
     <div className="space-y-5 pb-12 pt-1 md:space-y-6">
       {isEmergency && (
-        <section className="animate-pulse rounded-[1.5rem] border-2 border-red-500 bg-red-600/20 p-5 md:p-7 shadow-[0_0_50px_rgba(239,68,68,0.3)]">
-          <h2 className="text-4xl font-black uppercase tracking-widest text-red-50 font-display">🚨 {emergencyType}</h2>
-          <p className="mt-2 text-xl font-bold uppercase text-red-100/90 tracking-wide">
-             Evacuate immediately. <br className="hidden md:block" /> Follow the indicated exit route. Do not run. Follow staff instructions.
+        <section className="animate-fade-in rounded-[2rem] border-4 border-red-600 bg-red-950/80 p-8 md:p-12 shadow-[0_0_100px_rgba(239,68,68,0.5)] flex flex-col items-center justify-center text-center">
+          <p className="text-red-300 font-bold uppercase tracking-[0.2em] mb-4 text-sm animate-pulse">Critical Alert: {emergencyType}</p>
+          <h1 className="text-5xl md:text-7xl font-display font-black text-white uppercase leading-none">
+            🚨 MOVE NOW → <span className="text-red-400">{currentRoute.recommendedZone}</span>
+          </h1>
+          <p className="mt-6 text-xl tracking-widest text-slate-300 uppercase font-semibold">
+            Evacuate immediately. Follow the live routing map below.
           </p>
         </section>
       )}
@@ -224,7 +229,7 @@ export default function Dashboard({ userProfile, onResetExperience }) {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-            <article className={`rounded-[1.8rem] border p-5 shadow-glow flex flex-col justify-between ${futureAlert ? 'border-rose-300/25 bg-rose-300/12' : actionCard.tone}`}>
+            <article className={`rounded-[1.8rem] border-2 p-6 md:p-8 flex flex-col justify-between shadow-[0_0_40px_rgba(190,242,100,0.15)] ${futureAlert ? 'border-rose-400/50 bg-rose-500/10' : actionCard.tone}`}>
               <div>
                 {futureAlert ? (
                   <div className="mb-4 inline-flex items-center gap-2 rounded-[1rem] border border-rose-300/20 bg-rose-500/20 px-3 py-1">
@@ -251,9 +256,13 @@ export default function Dashboard({ userProfile, onResetExperience }) {
 
               <div>
                 {!futureAlert && (
-                  <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-slate-950/35 p-4">
-                    <p className="section-label text-[10px] font-semibold uppercase text-lime-200">AI Coach</p>
-                    <p className="mt-2 text-sm text-slate-100">{currentRoute.nudge || actionCard.ai}</p>
+                  <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-slate-950/40 p-4">
+                    <p className="section-label text-[10px] font-semibold uppercase text-lime-200 mb-2">🤖 AI Insight</p>
+                    <p className="text-sm text-slate-200 italic mb-3">"85% of fans are currently using the main corridor. Expect minor delays."</p>
+                    <p className="text-sm font-semibold text-lime-200">{currentRoute.nudge || actionCard.ai}</p>
+                    <p className="mt-3 inline-block rounded bg-lime-400/20 px-3 py-1 text-xs font-bold text-lime-300">
+                      Next Best Action: {actionCard.nextAction}
+                    </p>
                   </div>
                 )}
                 
@@ -277,24 +286,51 @@ export default function Dashboard({ userProfile, onResetExperience }) {
             </article>
 
             <div className="grid gap-3">
-              <div className="rounded-[1.5rem] border border-rose-300/20 bg-rose-300/14 p-4">
-                <p className="section-label text-[10px] font-semibold uppercase text-rose-100">Priority Alert</p>
-                <p className="mt-3 text-3xl font-bold uppercase text-white">{primaryAlert}</p>
-                <p className="mt-2 text-sm text-slate-100">Use {calmestZone.zone} instead.</p>
+              <div className="rounded-[1.5rem] border border-white/5 bg-slate-950/40 p-5 flex flex-col justify-center">
+                <p className="section-label text-[10px] font-semibold uppercase text-slate-400">Crowd Alert</p>
+                <p className="mt-2 text-xl font-semibold uppercase text-slate-200">{primaryAlert}</p>
+                <p className="mt-1 text-sm text-slate-400">Avoid this area.</p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <div className="score-panel rounded-[1.5rem] p-4">
-                  <p className="section-label text-[10px] font-semibold uppercase text-lime-200">Crowd Status</p>
-                  <p className="mt-3 font-display text-4xl uppercase leading-none text-white">{liveStatus.status}</p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 lg:flex-1">
+                <div className="rounded-[1.5rem] border border-white/5 bg-white/5 p-5 flex flex-col justify-center">
+                  <p className="section-label text-[10px] font-semibold uppercase text-slate-400">Crowd Status</p>
+                  <p className="mt-2 font-display text-2xl uppercase leading-none text-slate-200">{liveStatus.status}</p>
                 </div>
-                <div className="score-panel rounded-[1.5rem] p-4">
-                  <p className="section-label text-[10px] font-semibold uppercase text-lime-200">Average Wait</p>
-                  <p className="mt-3 font-display text-4xl uppercase leading-none text-white">{liveStatus.averageWait} min</p>
+                <div className="rounded-[1.5rem] border border-white/5 bg-white/5 p-5 flex flex-col justify-center">
+                  <p className="section-label text-[10px] font-semibold uppercase text-slate-400">Average Wait</p>
+                  <p className="mt-2 font-display text-2xl uppercase leading-none text-slate-200">{liveStatus.averageWait} min</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* System Impact Simulator Metrics */}
+        {!isEmergency && (
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-[1.25rem] border border-white/5 bg-white/5 p-4 flex items-center gap-4">
+              <span className="text-3xl">⚡</span>
+              <div>
+                <p className="text-2xl font-bold text-white">40%</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Faster movement</p>
+              </div>
+            </div>
+            <div className="rounded-[1.25rem] border border-white/5 bg-white/5 p-4 flex items-center gap-4">
+              <span className="text-3xl">⏱️</span>
+              <div>
+                <p className="text-2xl font-bold text-white">30%</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Reduced wait time</p>
+              </div>
+            </div>
+            <div className="rounded-[1.25rem] border border-white/5 bg-white/5 p-4 flex items-center gap-4">
+              <span className="text-3xl">🚨</span>
+              <div>
+                <p className="text-2xl font-bold text-white">50%</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Faster response</p>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {navigationMessage ? (

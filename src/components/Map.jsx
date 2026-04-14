@@ -66,11 +66,14 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="section-label text-[11px] font-semibold uppercase text-orange-200">
-            Smart Navigation
+            Dynamic Spatial Routing
           </p>
           <h2 className="mt-2 font-display text-4xl uppercase leading-none text-white">
             Crowd-aware path guidance
           </h2>
+          <p className="mt-2 text-sm font-semibold text-lime-300 italic tracking-wide">
+            "Like Google Maps, but for stadium crowds — optimized in real-time."
+          </p>
           <p className="mt-2 text-sm text-slate-300">
             Starting from {userProfile.gate}, optimized for {userProfile.seat} and{' '}
             {userProfile.goalLabel.toLowerCase()}.
@@ -102,15 +105,21 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(190,242,100,0.12),transparent_34%),radial-gradient(circle_at_80%_24%,rgba(56,189,248,0.12),transparent_18%)]" />
 
           <div className="relative z-10 mb-4 flex flex-wrap items-start justify-between gap-3">
-            <div className={`rounded-[1rem] border px-4 py-3 transition-colors duration-500 ${
+            <div className={`rounded-[1rem] border px-4 py-3 transition-colors duration-500 flex flex-col justify-between ${
               navigationStatus === 'rerouting' ? 'border-purple-500/25 bg-purple-500/10' : 'border-sky-400/25 bg-sky-400/10'
             }`}>
-              <p className={`section-label text-[10px] font-semibold uppercase ${navigationStatus === 'rerouting' ? 'text-purple-300' : 'text-sky-300'}`}>
-                Fastest recommendation
-              </p>
-              <p className="mt-2 text-lg font-bold text-white">{route.recommendedZone}</p>
-              <p className="text-sm text-slate-200">{zoneWait} min movement window</p>
-              <p className={`mt-1 text-sm font-semibold ${navigationStatus === 'rerouting' ? 'text-purple-200' : 'text-sky-200'}`}>{route.walkTime} min walk time</p>
+              <div>
+                <p className={`section-label text-[10px] font-semibold uppercase ${navigationStatus === 'rerouting' ? 'text-purple-300' : 'text-sky-300'}`}>
+                  Fastest recommendation
+                </p>
+                <p className="mt-2 text-lg font-bold text-white">{route.recommendedZone}</p>
+                <p className={`mt-1 text-sm font-semibold ${navigationStatus === 'rerouting' ? 'text-purple-200' : 'text-sky-200'}`}>
+                  ETA: {route.walkTime} min via {route.recommendedZone}
+                </p>
+                <div className="mt-2 inline-flex items-center gap-1 rounded bg-black/40 px-2 py-1 text-[10px] font-medium text-sky-200">
+                   💡 Avoids 65% congestion ahead
+                </div>
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-100">
@@ -213,8 +222,8 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
                     <animate attributeName="r" values="4.8;6.8;4.8" dur="2.1s" repeatCount="indefinite" />
                   </circle>
                   <circle cx={currentZone.x} cy={currentZone.y} r="2.6" fill="#ffffff" style={{ filter: 'drop-shadow(0 0 7px white)' }} />
-                  <text x={currentZone.x + 3} y={currentZone.y - 3} fill="#bae6fd" fontSize="3" fontWeight="700">
-                    YOU
+                  <text x={currentZone.x + 3} y={currentZone.y - 3} fill="#bae6fd" fontSize="3.5" fontWeight="700">
+                    📍 You are here
                   </text>
                 </motion.g>
               ) : null}
