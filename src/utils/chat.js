@@ -4,6 +4,16 @@ import { getBestRoute } from './routing';
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
+/**
+ * Safely sanitizes user input by stripping potentially harmful characters.
+ * @param {string} input - Raw user input string.
+ * @returns {string} Sanitized string.
+ */
+export function sanitizeInput(input) {
+  if (!input) return '';
+  return input.replace(/[<>]/g, '');
+}
+
 const ai = apiKey
   ? new GoogleGenAI({
       apiKey,
@@ -144,7 +154,11 @@ function buildLocalReply(message, crowdZones, stalls, phase, userProfile) {
 }
 
 export async function getAssistantReply(message, crowdZones, stalls, phase, userProfile) {
-  const fallbackReply = buildLocalReply(message, crowdZones, stalls, phase, userProfile);
+  // Security checks
+  const safeMessage = sanitizeInput(message);
+  const isKeyValid = typeof apiKey === 'string' && apiKey.length > 10;
+  
+  const fallbackReply = buildLocalReply(safeMessage, crowdZones, stalls, phase, userProfile);
 
   try {
     const fastestStall = [...stalls].sort((a, b) => a.waitTime - b.waitTime)[0];
@@ -180,13 +194,14 @@ ${extraContext}
 
 When a user asks for directions (washrooms, exits, food), use the optimal routes provided above. When they ask about crowd size, warn them about the surge predictions.`;
 
-    if (!ai) {
+    if (!ai || !isKeyValid) {
+      console.warn("API Key validation failed or GenAI offline. Falling back to local responder.");
       return fallbackReply;
     }
 
     const response = await ai.models.generateContent({
         model: 'gemini-1.5-flash',
-        contents: message,
+        contents: safeMessage,
         config: {
            systemInstruction: systemInstruction,
            temperature: 0.7,

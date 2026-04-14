@@ -191,7 +191,11 @@ export default function Dashboard({ userProfile, onResetExperience }) {
   return (
     <div className="space-y-5 pb-12 pt-1 md:space-y-6">
       {isEmergency && (
-        <section className="animate-fade-in rounded-[2rem] border-4 border-red-600 bg-red-950/80 p-8 md:p-12 shadow-[0_0_100px_rgba(239,68,68,0.5)] flex flex-col items-center justify-center text-center">
+        <section 
+          role="alert" 
+          aria-live="assertive" 
+          className="animate-fade-in rounded-[2rem] border-4 border-red-600 bg-red-950/80 p-8 md:p-12 shadow-[0_0_100px_rgba(239,68,68,0.5)] flex flex-col items-center justify-center text-center"
+        >
           <p className="text-red-300 font-bold uppercase tracking-[0.2em] mb-4 text-sm animate-pulse">Critical Alert: {emergencyType}</p>
           <h1 className="text-5xl md:text-7xl font-display font-black text-white uppercase leading-none">
             🚨 MOVE NOW → <span className="text-red-400">{currentRoute.recommendedZone}</span>
@@ -463,6 +467,7 @@ export default function Dashboard({ userProfile, onResetExperience }) {
             </div>
             <button
               type="button"
+              aria-label="Open AI Assistant"
               onClick={() => setIsChatOpen(true)}
               className="rounded-full bg-lime-300 px-4 py-3 text-sm font-bold uppercase tracking-[0.12em] text-slate-950"
             >
@@ -533,6 +538,7 @@ export default function Dashboard({ userProfile, onResetExperience }) {
 
       <button
         type="button"
+        aria-label="Launch AI Coach Chat Window"
         onClick={() => setIsChatOpen(true)}
         className="fixed bottom-5 right-5 z-40 rounded-full bg-lime-300 px-5 py-4 text-sm font-bold uppercase tracking-[0.14em] text-slate-950 shadow-[0_18px_40px_rgba(190,242,100,0.28)] transition hover:-translate-y-0.5"
       >

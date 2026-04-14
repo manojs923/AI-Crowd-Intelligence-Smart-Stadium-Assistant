@@ -1,21 +1,42 @@
+/**
+ * Evaluates crowd density and returns a severity string based on threshold.
+ * @param {number} people - The raw count of people in a given zone.
+ * @returns {string} - 'High', 'Medium', or 'Low' congestion level.
+ */
 export function getCrowdLevel(people) {
   if (people > 50) return 'High';
   if (people > 20) return 'Medium';
   return 'Low';
 }
 
+/**
+ * Maps a given crowd severity level to a standard Tailwind CSS background color class.
+ * @param {string} level - Congestion level ('High', 'Medium', 'Low').
+ * @returns {string} - Ex: 'bg-rose-500'
+ */
 export function getCrowdColor(level) {
   if (level === 'High') return 'bg-rose-500';
   if (level === 'Medium') return 'bg-amber-400';
   return 'bg-lime-400';
 }
 
+/**
+ * Maps a given crowd severity level to a standard Tailwind CSS text color class.
+ * @param {string} level - Congestion level.
+ * @returns {string} - Ex: 'text-rose-200'
+ */
 export function getCrowdTextColor(level) {
   if (level === 'High') return 'text-rose-200';
   if (level === 'Medium') return 'text-amber-200';
   return 'text-lime-200';
 }
 
+/**
+ * Mathematically estimates the required wait time based on queue depth and processing speed.
+ * @param {number} queueLength - Number of people in line.
+ * @param {number} avgServiceTime - Average seconds per person.
+ * @returns {number} - Estimated wait time integer.
+ */
 export function estimateWaitTime(queueLength, avgServiceTime) {
   return Math.round(queueLength * avgServiceTime);
 }

@@ -37,12 +37,16 @@ export default function OpsDashboard() {
       </header>
 
       {isEmergency && (
-        <section className="relative overflow-hidden rounded-[2rem] border-4 border-red-600 bg-red-950/80 p-8 shadow-[0_0_80px_rgba(239,68,68,0.5)] transition-all">
+        <section 
+          role="alert" 
+          aria-live="assertive" 
+          className="relative overflow-hidden rounded-[2rem] border-4 border-red-600 bg-red-950/80 p-8 shadow-[0_0_80px_rgba(239,68,68,0.5)] transition-all"
+        >
           <div className="absolute inset-0 animate-pulse bg-red-500/10 pointer-events-none"></div>
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
               <h2 className="text-4xl font-black uppercase tracking-widest text-white drop-shadow-md">
-                🚨 CRITICAL EMERGENCY (LEVEL 3): {emergencyType}
+                <span role="img" aria-label="alarm">🚨</span> CRITICAL EMERGENCY (LEVEL 3): {emergencyType}
               </h2>
               <div className="text-left md:text-right">
                 <span className="rounded bg-red-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-red-200">
@@ -99,7 +103,7 @@ export default function OpsDashboard() {
               disabled={isEmergency}
               className="group relative overflow-hidden rounded-[1.25rem] border border-red-500/30 bg-red-950/60 p-4 text-left transition hover:bg-red-900/80 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]"
             >
-              <h4 className="text-lg font-bold uppercase text-red-200">🔥 Trigger Fire Alarm</h4>
+              <h4 className="text-lg font-bold uppercase text-red-200"><span role="img" aria-label="fire">🔥</span> Trigger Fire Alarm</h4>
               <p className="mt-1 text-xs text-red-300/70">Initiates immediate zone-based evacuation routing.</p>
             </button>
             
@@ -108,7 +112,7 @@ export default function OpsDashboard() {
               disabled={isEmergency}
               className="group relative overflow-hidden rounded-[1.25rem] border border-amber-500/30 bg-amber-950/60 p-4 text-left transition hover:bg-amber-900/80 hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]"
             >
-              <h4 className="text-lg font-bold uppercase text-amber-200">🛡️ Trigger Security Incident</h4>
+              <h4 className="text-lg font-bold uppercase text-amber-200"><span role="img" aria-label="shield">🛡️</span> Trigger Security Incident</h4>
               <p className="mt-1 text-xs text-amber-300/70">Forces mass egress and blocks movement towards concourse.</p>
             </button>
           </div>
