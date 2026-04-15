@@ -86,8 +86,9 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
               key={item.key}
               type="button"
               disabled={isEmergency}
+              aria-label={`Route to ${item.label}`}
               onClick={() => onDestinationChange(item.key)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.1em] transition ${
+              className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.1em] transition focus:outline-none focus:ring-2 focus:ring-lime-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
                 destination === item.key
                   ? (isEmergency ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] border border-red-300' : 'bg-lime-300 text-slate-950')
                   : 'bg-slate-950/70 text-slate-300 hover:bg-white/10 hover:text-white'

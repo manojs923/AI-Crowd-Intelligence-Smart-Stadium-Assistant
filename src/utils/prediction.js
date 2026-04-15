@@ -183,16 +183,19 @@ export function buildSmartSuggestions(crowdZones, stalls, phase) {
 
   return [
     {
+      id: 'snack',
       title: 'Fast snack run',
       action: `${fastestStall.name} in ${fastestStall.zone} is the quickest option at ${fastestStall.waitTime} min.`,
       tone: 'lime',
     },
     {
+      id: 'calm',
       title: 'Move through the calm lane',
       action: `${calmestZone.zone} is the smoothest zone with only ${calmestZone.people} people detected.`,
       tone: 'sky',
     },
     {
+      id: 'avoid',
       title: 'Avoid pressure buildup',
       action:
         phase === 'Post-Match'

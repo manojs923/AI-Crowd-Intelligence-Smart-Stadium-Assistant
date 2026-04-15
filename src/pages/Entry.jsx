@@ -4,7 +4,15 @@ import { useNavigate } from 'react-router-dom';
 export default function Entry({ userProfile, onStart }) {
   const navigate = useNavigate();
   const [scanState, setScanState] = useState('idle'); // idle, connecting, fetching, success
+  const [scannedProfile, setScannedProfile] = useState(null);
   
+  const possibleProfiles = [
+    { gate: 'North Gate', seat: 'Section A, Row 12, Seat A45', goal: 'seat', goalLabel: 'Watch match' },
+    { gate: 'South Gate', seat: 'Section B, Row 5, Seat B12', goal: 'seat', goalLabel: 'Watch match' },
+    { gate: 'East Concourse', seat: 'VIP Box 4, Seat 2', goal: 'seat', goalLabel: 'Watch match' },
+    { gate: 'West Concourse', seat: 'Section C, Row 2, Seat C8', goal: 'seat', goalLabel: 'Watch match' },
+  ];
+
   // If user already has profile and hits Entry, usually they just resume, but we let them scan again.
   // Actually, we can just let them scan.
 
@@ -19,19 +27,16 @@ export default function Entry({ userProfile, onStart }) {
     }
     if (scanState === 'success') {
       const timer = window.setTimeout(() => {
-        onStart({
-          gate: 'South Gate',
-          seat: 'Section B, Row 5, Seat B12',
-          goal: 'seat',
-          goalLabel: 'Watch match',
-        });
+        onStart(scannedProfile);
         navigate('/dashboard');
       }, 1000);
       return () => window.clearTimeout(timer);
     }
-  }, [scanState, navigate, onStart]);
+  }, [scanState, navigate, onStart, scannedProfile]);
 
   const handleScan = () => {
+    const profile = possibleProfiles[Math.floor(Math.random() * possibleProfiles.length)];
+    setScannedProfile(profile);
     setScanState('connecting');
   };
 
@@ -59,7 +64,8 @@ export default function Entry({ userProfile, onStart }) {
               <button
                 type="button"
                 onClick={handleScan}
-                className="w-full max-w-sm rounded-[1.35rem] bg-lime-300 px-6 py-4 text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:-translate-y-0.5 shadow-neon"
+                aria-label="Scan match ticket"
+                className="w-full max-w-sm rounded-[1.35rem] bg-lime-300 px-6 py-4 text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:-translate-y-0.5 shadow-neon focus:outline-none focus:ring-2 focus:ring-lime-400 focus:ring-offset-2 focus:ring-offset-slate-900"
               >
                 [ Scan Match Ticket ]
               </button>
@@ -67,7 +73,7 @@ export default function Entry({ userProfile, onStart }) {
           )}
 
           {scanState !== 'idle' && (
-            <div className="w-full max-w-md space-y-4 font-mono text-sm sm:text-base">
+            <div className="w-full max-w-md space-y-4 font-mono text-sm sm:text-base" role="alert" aria-live="assertive">
               <div className={`p-4 rounded-xl border ${scanState !== 'idle' ? 'border-sky-400/30 bg-sky-400/10 text-sky-300' : 'border-white/10 text-slate-500'}`}>
                 🔄 Connecting to ticket system...
               </div>
@@ -84,7 +90,7 @@ export default function Entry({ userProfile, onStart }) {
                 <div className="mt-8 text-center animate-fade-in">
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Profile Auto-Filled</p>
                   <p className="text-lg font-bold text-white rounded-full bg-white/10 px-4 py-2 inline-block">
-                    South Gate | Section B | Row 5 | Seat B12
+                    {scannedProfile?.gate} | {scannedProfile?.seat.replace(/, /g, ' | ')}
                   </p>
                 </div>
               )}

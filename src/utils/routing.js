@@ -67,7 +67,19 @@ function getDistance(zoneA, zoneB) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-// Extensible pathfinding logic updated to support predictive phase analytics, load balancing and ADA routing
+/**
+ * Computes the optimal path through the stadium graph using a customized Dijkstra algorithm.
+ * Applies costs based on physical distance, predictive crowd forecasts, and anti-herding algorithms.
+ * 
+ * @param {string} startZoneName - Starting node ID.
+ * @param {string} targetZoneName - Destination node ID.
+ * @param {Array<Object>} crowdZones - Active graph mapping array.
+ * @param {string} phase - The current match phase affecting predictive congestion.
+ * @param {number} crowdWeight - Multiplier applied to crowd density penalty.
+ * @param {boolean} accessibleMode - If true, avoids nodes that require stairs.
+ * @param {string} uid - User identifier used for deterministically balancing routing loads.
+ * @returns {Object} { pathZones: string[], walkTime: number }
+ */
 export function findShortestPath(startZoneName, targetZoneName, crowdZones, phase = 'First Half', crowdWeight = 0.5, accessibleMode = false, uid = "default") {
   if (startZoneName === targetZoneName) {
     return { pathZones: [startZoneName], walkTime: 0 };
@@ -163,6 +175,16 @@ export function getGoalDestination(goal) {
   return goalToDestination[goal] ?? 'seat';
 }
 
+/**
+ * Primary routing orchestrator. Determines correct target nodes based on semantic goals
+ * and handles fallbacks, multiple exit strategies, and dynamic metadata assignment.
+ * 
+ * @param {string} destination - Goal string (e.g. 'seat', 'food', 'exit').
+ * @param {Array<Object>} crowdZones - Complete graph node data.
+ * @param {Object} userProfile - Contains origin gate, destination seat, and preferences.
+ * @param {string} phase - Time phase determining predictive congestion multiplier.
+ * @returns {Object} Comprehensive route package containing steps, arrays, walkTime, and nudges.
+ */
 export function getBestRoute(destination, crowdZones, userProfile, phase = 'First Half') {
   const template = destinationMap[destination] ?? destinationMap.seat;
   const startGate = userProfile?.gate ?? 'South Gate';

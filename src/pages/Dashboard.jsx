@@ -181,6 +181,17 @@ export default function Dashboard({ userProfile, onResetExperience }) {
     setRouteSavings(0);
   };
 
+  const handleQuickAction = (id) => {
+    if (id === 'snack') {
+      setDestination('food');
+    } else {
+      setDestination(phase === 'Post-Match' ? 'exit' : 'seat');
+    }
+    setNavigationStatus('rerouting');
+    setRouteSavings(Math.floor(Math.random() * 4) + 3); // realistic dynamic time savings
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const navigationMessage =
     navigationStatus === 'rerouting'
       ? `Crowd spike detected -> Re-routing... New path saves ${routeSavings} min`
@@ -261,7 +272,7 @@ export default function Dashboard({ userProfile, onResetExperience }) {
               <div>
                 {!futureAlert && (
                   <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-slate-950/40 p-4">
-                    <p className="section-label text-[10px] font-semibold uppercase text-lime-200 mb-2">🤖 AI Insight</p>
+                    <p className="section-label text-[10px] font-semibold uppercase text-lime-200 mb-2">🤖 AI DECISION ENGINE:</p>
                     <p className="text-sm text-slate-200 italic mb-3">"85% of fans are currently using the main corridor. Expect minor delays."</p>
                     <p className="text-sm font-semibold text-lime-200">{currentRoute.nudge || actionCard.ai}</p>
                     <p className="mt-3 inline-block rounded bg-lime-400/20 px-3 py-1 text-xs font-bold text-lime-300">
@@ -424,10 +435,10 @@ export default function Dashboard({ userProfile, onResetExperience }) {
                 </div>
               </div>
 
-              <div className="mb-4 rounded-[1.25rem] border border-lime-300/20 bg-lime-300/10 p-4">
-                <p className="section-label text-[10px] font-semibold uppercase text-lime-200">Best choice</p>
-                <p className="mt-2 text-2xl font-bold text-white">{bestChoice.name}</p>
-                <p className="mt-2 text-sm text-slate-100">
+              <div className="mb-6 scale-105 rounded-[1.5rem] border-2 border-lime-400/40 bg-lime-400/10 p-5 shadow-[0_0_30px_rgba(163,230,53,0.2)]">
+                <p className="section-label text-[11px] font-bold uppercase text-lime-300">✅ Best choice</p>
+                <p className="mt-2 text-3xl font-bold text-white">{bestChoice.name}</p>
+                <p className="mt-2 font-semibold text-lime-100">
                   {bestChoice.walkTime} min walk + {bestChoice.waitTime} min wait = {bestChoice.totalTime} min total
                 </p>
               </div>
@@ -474,11 +485,23 @@ export default function Dashboard({ userProfile, onResetExperience }) {
               Open AI Assistant
             </button>
           </div>
-          <div className="rounded-[1.25rem] border border-rose-300/20 bg-rose-300/12 p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.08em] text-rose-100">Alert</p>
-            <p className="mt-2 text-lg font-bold text-white">{primaryAlert}</p>
-            <p className="mt-2 text-sm text-slate-100">Recommended: {calmestZone.zone}</p>
-            <p className="mt-2 text-sm text-slate-300">{alerts[0]}</p>
+          <div className="rounded-[1.25rem] border border-sky-500/20 bg-slate-950/60 p-5">
+            <div className="flex flex-col gap-4">
+              <div className="rounded-xl bg-lime-500/10 p-4 border border-lime-500/20 shadow-[0_0_15px_rgba(132,204,22,0.1)]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-lime-400">✅ Recommended</p>
+                <p className="mt-1 text-xl font-bold text-white">{calmestZone.zone} → {getWalkingMinutes(userProfile.gate, calmestZone.zone, adjustedZones)} min</p>
+              </div>
+              <div className="rounded-xl bg-rose-500/10 p-4 border border-rose-500/20">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-rose-400">❌ Avoid</p>
+                <p className="mt-1 text-xl font-bold text-white">{busiestZone.zone} → Overloaded</p>
+              </div>
+              <div className="mt-1 rounded-xl bg-slate-900/80 p-4 border border-white/10">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-sky-400 mb-2">🤖 AI Reason</p>
+                <p className="text-sm font-medium text-slate-200 leading-relaxed">
+                  Choosing {calmestZone.zone} saves significant time and avoids the severe congestion spike detected at {busiestZone.zone}.
+                </p>
+              </div>
+            </div>
           </div>
         </article>
       </section>
@@ -494,15 +517,17 @@ export default function Dashboard({ userProfile, onResetExperience }) {
           <div className="flex gap-2">
             <button
               type="button"
+              aria-label={showAdvanced ? 'Hide advanced data' : 'Show detailed AI insights'}
               onClick={() => setShowAdvanced((current) => !current)}
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-slate-200"
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-slate-200 transition focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
             </button>
             <button
               type="button"
+              aria-label="Reset simulation profile"
               onClick={onResetExperience}
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-slate-200"
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-slate-200 transition focus:outline-none focus:ring-2 focus:ring-red-400"
             >
               Reset Profile
             </button>
@@ -519,14 +544,20 @@ export default function Dashboard({ userProfile, onResetExperience }) {
 
             <section className="grid gap-4 lg:grid-cols-3">
               {smartSuggestions.map((suggestion) => (
-                <article
+                <button
                   key={suggestion.title}
-                  className={`rounded-[1.5rem] border p-5 shadow-glow ${insightTone[suggestion.tone]}`}
+                  type="button"
+                  aria-label={`Apply AI Route: ${suggestion.title}`}
+                  onClick={() => handleQuickAction(suggestion.id)}
+                  className={`group relative overflow-hidden rounded-[1.5rem] border p-5 shadow-glow transition-all hover:-translate-y-1 hover:shadow-lg active:scale-95 text-left focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${insightTone[suggestion.tone]}`}
                 >
-                  <p className="section-label text-[10px] font-semibold uppercase opacity-75">Quick play</p>
+                  <p className="section-label flex items-center justify-between text-[10px] font-semibold uppercase opacity-75">
+                    Quick play
+                    <span className="opacity-0 transition-opacity font-bold text-[10px] tracking-widest group-hover:opacity-100">⚡ Apply Route</span>
+                  </p>
                   <h3 className="mt-3 text-2xl font-bold text-white">{suggestion.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-100">{suggestion.action}</p>
-                </article>
+                </button>
               ))}
             </section>
 
