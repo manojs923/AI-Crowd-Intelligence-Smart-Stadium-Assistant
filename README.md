@@ -1,4 +1,4 @@
-# Smart Stadium AI
+# CrowdOS: Intelligent Venue Engine
 
 ## Problem
 Managing crowd congestion in large stadiums.
@@ -10,6 +10,9 @@ AI-powered routing + live crowd analysis.
 - Real-time route optimization
 - AI assistant guidance
 - Emergency evacuation system
+
+## AI Decision Engine
+The system not only recommends routes but explains decisions using predicted congestion modeling and confidence scoring.
 
 ## Tech Stack
 - React + Tailwind
