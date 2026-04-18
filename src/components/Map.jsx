@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getBestRoute } from '../utils/routing';
 import { getCrowdColor, getCrowdLevel } from '../utils/prediction';
+import { trackRoute } from '../utils/firebase';
 
 const destinations = [
   { key: 'seat', label: 'Seat' },
@@ -37,6 +38,7 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
 
   useEffect(() => {
     setSelectedZone(route.recommendedZone);
+    trackRoute();
   }, [route.recommendedZone]);
 
   const activeZone = crowdZones.find((zone) => zone.zone === selectedZone) ?? crowdZones[0];

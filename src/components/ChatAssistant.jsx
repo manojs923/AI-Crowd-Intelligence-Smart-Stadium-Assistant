@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { buildWelcomeMessage, getAssistantReply } from '../utils/chat';
+import { trackAI } from '../utils/firebase';
 
 const quickPrompts = [
   'Where is nearest washroom?',
@@ -51,6 +52,7 @@ export default function ChatAssistant({
     setMessages((current) => [...current, { role: 'user', text: value }]);
     setInput('');
     setIsTyping(true);
+    trackAI();
 
     const reply = await getAssistantReply(value, crowdZones, stalls, phase, userProfile);
     

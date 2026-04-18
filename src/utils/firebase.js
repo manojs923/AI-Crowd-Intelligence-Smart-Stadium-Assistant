@@ -39,4 +39,12 @@ if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'demo_key') {
   console.log('Firebase running in DEMO mode (Services mocked)');
 }
 
+export const trackRoute = () => {
+  if (analytics) logEvent(analytics, "route_computed");
+};
+
+export const trackAI = () => {
+  if (analytics) logEvent(analytics, "ai_used");
+};
+
 export { app, analytics, auth };
