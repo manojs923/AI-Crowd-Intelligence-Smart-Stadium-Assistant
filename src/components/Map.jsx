@@ -77,8 +77,8 @@ export default function Map({ crowdZones, destination, onDestinationChange, user
             "Like Google Maps, but for stadium crowds — optimized in real-time."
           </p>
           <p className="mt-2 text-sm text-slate-300">
-            Starting from {userProfile.gate}, optimized for {userProfile.seat} and{' '}
-            {userProfile.goalLabel.toLowerCase()}.
+            Starting from {userProfile?.gate}, optimized for {userProfile?.seat} and{' '}
+            {userProfile?.goalLabel?.toLowerCase() || ''}.
           </p>
         </div>
 

@@ -47,13 +47,13 @@ export default function Home({ userProfile }) {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/entry"
-                className="rounded-[1.25rem] bg-lime-300 px-6 py-4 text-center text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:-translate-y-0.5"
+                className="rounded-[1.25rem] bg-lime-300 px-6 py-4 text-center text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
               >
                 Start Matchday Flow
               </Link>
               <Link
                 to={userProfile ? '/dashboard' : '/entry'}
-                className="rounded-[1.25rem] border border-white/15 bg-white/5 px-6 py-4 text-center text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:border-white/30 hover:bg-white/10"
+                className="rounded-[1.25rem] border border-white/15 bg-white/5 px-6 py-4 text-center text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
               >
                 {userProfile ? 'Resume Live Dashboard' : 'Set Fan Profile'}
               </Link>

@@ -82,7 +82,7 @@ export default function App() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `rounded-[1rem] px-3 py-3 text-center text-sm font-semibold uppercase tracking-[0.16em] transition ${
+                  `rounded-[1rem] px-3 py-3 text-center text-sm font-semibold uppercase tracking-[0.16em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] ${
                     isActive
                       ? 'bg-lime-300 text-slate-950 shadow-neon'
                       : 'text-slate-300 hover:bg-white/8 hover:text-white'

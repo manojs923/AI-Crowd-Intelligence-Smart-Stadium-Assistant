@@ -16,6 +16,7 @@ import {
 } from '../utils/prediction';
 import { getGoalDestination, getBestRoute } from '../utils/routing';
 import { useDemoState } from '../utils/demoState';
+import { saveUserPreferences, getUserPreferences } from '../utils/firebase';
 
 const phases = ['Pre-Match', 'First Half', 'Halftime', 'Second Half', 'Post-Match'];
 const insightTone = {
@@ -48,6 +49,7 @@ export default function Dashboard({ userProfile, onResetExperience }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [navigationStatus, setNavigationStatus] = useState('idle');
   const [routeSavings, setRouteSavings] = useState(0);
+  const [toastMessage, setToastMessage] = useState(null);
   const theme = getPhaseTheme(phase);
 
   useEffect(() => {
@@ -57,6 +59,16 @@ export default function Dashboard({ userProfile, onResetExperience }) {
       setDestination(getGoalDestination(userProfile?.goal));
     }
   }, [userProfile, isEmergency]);
+
+  useEffect(() => {
+    const loadPrefs = async () => {
+      const data = await getUserPreferences(userProfile?.id || "anon_user");
+      if (data?.accessibleMode !== undefined) {
+        setAccessibleMode(data.accessibleMode);
+      }
+    };
+    loadPrefs();
+  }, [userProfile]);
 
   useEffect(() => {
     setIsRefreshing(true);
@@ -217,7 +229,8 @@ export default function Dashboard({ userProfile, onResetExperience }) {
         </section>
       )}
 
-      <section className={`stadium-panel overflow-hidden rounded-[2rem] border ${isEmergency ? 'border-red-500 bg-red-950/40' : theme.border} p-5 md:p-7`}>
+      <section aria-labelledby="live-dashboard-heading" className={`stadium-panel overflow-hidden rounded-[2rem] border ${isEmergency ? 'border-red-500 bg-red-950/40' : theme.border} p-5 md:p-7`}>
+        <h2 id="live-dashboard-heading" className="sr-only">Live Stadium Dashboard</h2>
         <div className="relative z-10 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
@@ -232,8 +245,22 @@ export default function Dashboard({ userProfile, onResetExperience }) {
               </span>
               <button
                 type="button"
-                onClick={() => setAccessibleMode(!accessibleMode)}
-                className={`rounded-full border px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] transition-all duration-300 ${accessibleMode ? 'border-sky-400 bg-sky-400/20 text-sky-200 shadow-[0_0_12px_rgba(56,189,248,0.4)]' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'}`}
+                aria-pressed={accessibleMode}
+                aria-label={accessibleMode ? "Disable Accessible Mode" : "Enable Accessible Mode"}
+                onClick={() => {
+                  const newMode = !accessibleMode;
+                  setAccessibleMode(newMode);
+                  if (userProfile?.id) {
+                    saveUserPreferences(userProfile.id, { accessibleMode: newMode });
+                  } else {
+                    saveUserPreferences('anon_user', { accessibleMode: newMode });
+                  }
+                  
+                  // Tie-breaker polish: Toast Notification
+                  setToastMessage(newMode ? '♿ Accessible mode enabled & saved' : 'Standard routing restored');
+                  setTimeout(() => setToastMessage(null), 3000);
+                }}
+                className={`rounded-full border px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${accessibleMode ? 'border-sky-400 bg-sky-400/20 text-sky-200 shadow-[0_0_12px_rgba(56,189,248,0.4)]' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'}`}
               >
                 ♿ Accessible Mode
               </button>
@@ -293,15 +320,17 @@ export default function Dashboard({ userProfile, onResetExperience }) {
                 <div className="mt-5 flex flex-wrap gap-2">
                   <button
                     type="button"
+                    aria-label={navigationStatus === 'idle' ? 'Follow Route Navigation' : 'Navigation Active'}
                     onClick={handleStartNavigation}
-                    className="rounded-full bg-white px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-950"
+                    className="rounded-full bg-white px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                   >
                     {navigationStatus === 'idle' ? 'Follow Route' : 'Navigating...'}
                   </button>
                   <button
                     type="button"
+                    aria-label="Ask the AI Assistant why"
                     onClick={() => setIsChatOpen(true)}
-                    className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-white"
+                    className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                   >
                     Ask Why
                   </button>
@@ -602,6 +631,13 @@ export default function Dashboard({ userProfile, onResetExperience }) {
           </div>
         </div>
       ) : null}
+
+      {/* Tie-breaker UI Polish: Event Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 animate-bounce rounded-full border border-lime-400/30 bg-slate-900/90 px-6 py-3 text-sm font-bold uppercase tracking-widest text-lime-400 shadow-[0_10px_30px_rgba(163,230,53,0.15)] backdrop-blur-md transition-all">
+          ✓ {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
