@@ -14,6 +14,7 @@ export default function ChatAssistant({
   stalls,
   phase,
   userProfile,
+  language = 'English',
   isSheet = false,
   onClose,
 }) {
@@ -54,7 +55,7 @@ export default function ChatAssistant({
     setIsTyping(true);
     trackAI();
 
-    const reply = await getAssistantReply(value, crowdZones, stalls, phase, userProfile);
+    const reply = await getAssistantReply(value, crowdZones, stalls, phase, userProfile, language);
     
     setMessages((current) => [...current, { role: 'assistant', text: reply }]);
     setIsTyping(false);

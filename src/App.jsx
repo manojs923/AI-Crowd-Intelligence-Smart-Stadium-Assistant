@@ -24,6 +24,8 @@ function loadProfile() {
 
 export default function App() {
   const [userProfile, setUserProfile] = useState(loadProfile);
+  const [globalLanguage, setGlobalLanguage] = useState('English');
+  const languages = ['English', 'Español', 'Français', 'العربية', 'Deutsch'];
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -65,6 +67,16 @@ export default function App() {
               </div>
             ) : null}
             
+            <select
+              value={globalLanguage}
+              onChange={(e) => setGlobalLanguage(e.target.value)}
+              className="hidden md:block rounded-full border border-white/10 bg-slate-950/50 px-3 py-1.5 text-xs text-slate-300 outline-none transition focus:border-sky-400 focus:ring-1 focus:ring-sky-400"
+            >
+              {languages.map((lang) => (
+                <option key={lang} value={lang}>{lang}</option>
+              ))}
+            </select>
+
             <NavLink
               to="/ops"
               target="_blank"
@@ -107,7 +119,7 @@ export default function App() {
             path="/dashboard"
             element={
               userProfile ? (
-                <Dashboard userProfile={userProfile} onResetExperience={() => setUserProfile(null)} />
+                <Dashboard userProfile={userProfile} language={globalLanguage} onResetExperience={() => setUserProfile(null)} />
               ) : (
                 <Navigate to="/entry" replace />
               )

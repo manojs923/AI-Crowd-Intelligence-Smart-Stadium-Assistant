@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDemoState } from '../utils/demoState';
 import crowdZones from '../data/crowdData.json';
+import OpsAIAnalyst from '../components/OpsAIAnalyst';
 
 const phases = ['Pre-Match', 'First Half', 'Halftime', 'Second Half', 'Post-Match'];
 
@@ -152,6 +153,14 @@ export default function OpsDashboard() {
             })}
          </div>
       </section>
+
+      {/* Integrate the AI Analyst Panel */}
+      <OpsAIAnalyst 
+        phase={phase} 
+        isEmergency={isEmergency} 
+        emergencyType={emergencyType} 
+        crowdZones={crowdZones} 
+      />
     </div>
   );
 }

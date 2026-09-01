@@ -153,7 +153,7 @@ function buildLocalReply(message, crowdZones, stalls, phase, userProfile) {
   return `Right now I'd avoid ${busiestZone.zone} and use ${calmestZone.zone} where possible. If you tell me whether you need your seat, food, washroom, or exit, I'll give you the best route immediately.`;
 }
 
-export async function getAssistantReply(message, crowdZones, stalls, phase, userProfile) {
+export async function getAssistantReply(message, crowdZones, stalls, phase, userProfile, language = 'English') {
   // Security checks
   const safeMessage = sanitizeInput(message);
   const isKeyValid = typeof apiKey === 'string' && apiKey.length > 10;
@@ -176,7 +176,8 @@ export async function getAssistantReply(message, crowdZones, stalls, phase, user
         extraContext = `User Location: Gate ${userProfile.gate}, Seat ${userProfile.seat}. Their main matchday goal: ${userProfile.goalLabel}.`;
     }
 
-    const systemInstruction = `You are a live Matchday Assistant for a Smart Stadium.
+const systemInstruction = `You are a live Matchday Assistant for a Smart Stadium.
+IMPORTANT: You MUST reply entirely in ${language}.
 Be concise, clear, warm, and practical. Sound like a real assistant speaking to a fan, not a technical system prompt. Keep responses to 2-3 sentences max.
 If the user greets you, greet them back naturally and immediately offer 2-4 concrete things you can help with.
 If the user asks a vague question, guide them toward the next best action instead of giving a generic answer.

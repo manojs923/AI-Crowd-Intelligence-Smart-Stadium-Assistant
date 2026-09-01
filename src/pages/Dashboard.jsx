@@ -37,7 +37,7 @@ function getWalkingMinutes(fromZone, toZone, zones) {
   return Math.max(2, Math.round(distance / 14));
 }
 
-export default function Dashboard({ userProfile, onResetExperience }) {
+export default function Dashboard({ userProfile, language = 'English', onResetExperience }) {
   const [demoState] = useDemoState();
   const { phase, isEmergency, emergencyType } = demoState;
 
@@ -625,6 +625,7 @@ export default function Dashboard({ userProfile, onResetExperience }) {
               stalls={queueCards}
               phase={phase}
               userProfile={userProfile}
+              language={language}
               isSheet
               onClose={() => setIsChatOpen(false)}
             />
