@@ -10,7 +10,7 @@ env:
   # The S3 bucket name will need to be updated after you run Terraform once!
   S3_BUCKET: stadium-assistant-frontend-ad2s4u9o
   CLOUDFRONT_DIST_ID: E32TMOX9JAF3CN
-  ECR_REPOSITORY: 588319086756.dkr.ecr.us-east-1.amazonaws.com/stadium-backend
+  ECR_REPOSITORY: stadium-backend
 
 jobs:
   deploy-frontend:
