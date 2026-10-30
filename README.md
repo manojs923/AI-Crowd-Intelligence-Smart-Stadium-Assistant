@@ -1,10 +1,12 @@
-# CrowdOS: Intelligent Venue Engine
+# AI-Crowd-Intelligence-Smart-Stadium-Assistant
+
 
 ## Problem Statement
 Managing crowd congestion in large stadiums is a complex, dynamic challenge. Traditional signage and static routing fail to adapt to live surges, leading to bottlenecks, poor accessibility, and decreased fan satisfaction.
 
 ## Approach & Logic
-CrowdOS uses real-time predictive modeling to route fans dynamically. Our custom AI decision engine calculates localized crowd density and wait times across all venue zones. Fans receive personalized routing via a live dashboard, dynamically shifting foot traffic to lower-pressure concourses.
+AI-Crowd-Intelligence-Smart-Stadium-Assistant
+uses real-time predictive modeling to route fans dynamically. Our custom AI decision engine calculates localized crowd density and wait times across all venue zones. Fans receive personalized routing via a live dashboard, dynamically shifting foot traffic to lower-pressure concourses.
 
 ## Architecture
 
