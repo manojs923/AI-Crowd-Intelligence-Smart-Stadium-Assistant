@@ -2,7 +2,7 @@
 
 CrowdOS is a React stadium operations and fan-guidance demo. It combines simulated crowd and queue data, local graph routing, optional Gemini assistance, and Firebase Auth/Firestore. Routing and local AI fallbacks continue working when remote services are unavailable.
 
-**Live demo:** [Vercel URL](https://YOUR-VERCEL-PROJECT.vercel.app) (replace with your deployed URL)
+**Live demo:** [CrowdOS on Vercel](https://ai-crowd-intelligence-smart-stadium.vercel.app)
 
 ## Architecture
 
