@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getBestRoute } from '../utils/routing';
+import { findShortestPath, getBestRoute } from '../utils/routing';
 
 describe('Routing Engine Integration', () => {
   const mockCrowdZones = [
@@ -28,10 +28,33 @@ describe('Routing Engine Integration', () => {
     expect(result.steps.length).toBeGreaterThan(0);
   });
 
-  it('should trigger ADA warning string if appropriate parameters passed', () => {
-    // Testing accessibility flags if they were implemented within routing payload
-    const accessibleProfile = { ...mockProfile, accessible: true };
+  it('returns a route when accessible mode is active', () => {
+    const accessibleProfile = { ...mockProfile, accessibleMode: true };
     const route = getBestRoute('seat', mockCrowdZones, accessibleProfile, 'First Half');
-    expect(route.pathZones).toBeTruthy(); // Even if ADA isn't natively handled in this slice, it should return a safe path object
+    expect(route.pathZones).toBeTruthy();
+  });
+
+  it('avoids stair nodes in accessible mode when an alternative route exists', () => {
+    const zones = [
+      { zone: 'South Gate', x: 0, y: 0, people: 0 },
+      { zone: 'Lower Deck Exit', x: 1, y: 0, people: 0, isStairs: true },
+      { zone: 'East Concourse', x: 2, y: 0, people: 0 },
+      { zone: 'North Gate', x: 3, y: 0, people: 0 },
+      { zone: 'West Concourse', x: 0, y: 3, people: 0 },
+      { zone: 'Food Court', x: 0, y: 1.5, people: 0 },
+    ];
+
+    const route = findShortestPath(
+      'South Gate',
+      'North Gate',
+      zones,
+      'First Half',
+      0,
+      true,
+      'ada-test',
+    );
+
+    expect(route.pathZones).not.toContain('Lower Deck Exit');
+    expect(route.pathZones.at(-1)).toBe('North Gate');
   });
 });

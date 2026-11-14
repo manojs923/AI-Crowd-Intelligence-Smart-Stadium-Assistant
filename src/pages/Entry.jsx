@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function Entry({ userProfile, onStart }) {
+export default function Entry({ onStart }) {
   const navigate = useNavigate();
   const [scanState, setScanState] = useState('idle'); // idle, connecting, fetching, success
   const [scannedProfile, setScannedProfile] = useState(null);

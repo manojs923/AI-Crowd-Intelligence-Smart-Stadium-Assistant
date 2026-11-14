@@ -8,8 +8,6 @@ export default function OpsAIAnalyst({ phase, isEmergency, emergencyType, crowdZ
     setIsAnalyzing(true);
 
     const sortedZones = [...crowdZones].sort((a, b) => b.people - a.people);
-    const criticalZones = sortedZones.slice(0, 3).map(z => `${z.zone} (${z.people} pax)`).join(', ');
-    const safestZones = sortedZones.slice(-3).map(z => `${z.zone} (${z.people} pax)`).join(', ');
 
     try {
       const response = await fetch('/api/opsAnalysis', {
@@ -39,7 +37,7 @@ export default function OpsAIAnalyst({ phase, isEmergency, emergencyType, crowdZ
       setAnalysis(
         `1. TACTICAL SITREP: Local assessment; AI is unavailable. ${busiestZone} currently has the highest reported crowd level during ${phase}.\n` +
         `2. IMMEDIATE ANOMALIES: - ${isEmergency ? `Emergency reported: ${emergencyType}.` : `Monitor congestion near ${busiestZone}.`}\n` +
-        `3. DEPLOYMENT ORDERS: - Keep stewards clear of ${clearestZone} and direct fans toward verified open routes.`,
+        `3. DEPLOYMENT ORDERS: - Verify the route to ${clearestZone} is open, then direct fans there; keep stewards near ${busiestZone}.`,
       );
     } finally {
       setIsAnalyzing(false);

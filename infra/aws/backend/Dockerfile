@@ -1,12 +1,12 @@
-# Stage 1: Build Environment
-FROM node:20-alpine AS builder
+# Stage 1: Install the locked production dependencies
+FROM node:22-alpine AS builder
 WORKDIR /usr/src/app
 COPY package*.json ./
-RUN npm install
-COPY . .
+RUN npm ci --omit=dev
+COPY server.js ./
 
 # Stage 2: Production Environment
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 ENV NODE_ENV=production
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/node_modules ./node_modules

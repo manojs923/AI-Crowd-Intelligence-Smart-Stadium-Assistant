@@ -12,6 +12,8 @@ functions/.secret.local
 
 # Terraform
 .terraform/
+*.tfvars
+!*.tfvars.example
 *.tfstate
 *.tfstate.backup
 .terraform.tfstate.lock.info

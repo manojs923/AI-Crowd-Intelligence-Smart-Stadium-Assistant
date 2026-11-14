@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node ./node_modules/vite/bin/vite.js",
     "build": "node ./node_modules/vite/bin/vite.js build",
+    "lint": "eslint --ext .js,.jsx src functions vite.config.js test.js test-sdk.js",
     "preview": "node ./node_modules/vite/bin/vite.js preview",
     "test": "node ./node_modules/vitest/vitest.mjs run",
     "test:coverage": "node ./node_modules/vitest/vitest.mjs run --coverage"
@@ -18,11 +19,15 @@
     "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^4.3.2",
     "@vitest/coverage-v8": "^4.1.4",
     "autoprefixer": "^10.4.20",
+    "eslint": "^10.15.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
     "jsdom": "^29.0.2",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.14",
