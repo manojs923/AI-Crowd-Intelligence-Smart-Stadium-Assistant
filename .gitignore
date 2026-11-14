@@ -7,8 +7,7 @@ dist/
 .DS_Store
 Thumbs.db
 .vite/
-functions/.env*
-functions/.secret.local
+.vercel/
 
 # Terraform
 .terraform/
