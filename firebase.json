@@ -1,4 +1,8 @@
 {
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22"
+  },
   "hosting": {
     "public": "dist",
     "ignore": [
@@ -7,6 +11,20 @@
       "**/node_modules/**"
     ],
     "rewrites": [
+      {
+        "source": "/api/assistantReply",
+        "function": {
+          "functionId": "assistantReply",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/opsAnalysis",
+        "function": {
+          "functionId": "opsAnalysis",
+          "region": "us-central1"
+        }
+      },
       {
         "source": "**",
         "destination": "/index.html"

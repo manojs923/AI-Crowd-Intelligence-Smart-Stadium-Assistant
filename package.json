@@ -11,8 +11,6 @@
     "test:coverage": "node ./node_modules/vitest/vitest.mjs run --coverage"
   },
   "dependencies": {
-    "@google/genai": "^1.49.0",
-    "dotenv": "^17.4.2",
     "firebase": "^12.12.0",
     "framer-motion": "^12.38.0",
     "react": "^18.3.1",

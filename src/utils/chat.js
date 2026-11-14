@@ -1,8 +1,5 @@
-import { GoogleGenAI } from '@google/genai';
 import { buildAlerts, getCrowdLevel, predictZoneTrend } from './prediction';
 import { getBestRoute } from './routing';
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 /**
  * Safely sanitizes user input by stripping potentially harmful characters.
@@ -13,12 +10,6 @@ export function sanitizeInput(input) {
   if (!input) return '';
   return input.replace(/[<>]/g, '');
 }
-
-const ai = apiKey
-  ? new GoogleGenAI({
-      apiKey,
-    })
-  : null;
 
 function formatRoute(route) {
   if (!route?.steps?.length) {
@@ -62,6 +53,7 @@ function matchesConcept(tokens, keywords) {
   return tokens.some((token) =>
     keywords.some((keyword) => {
       if (token === keyword) return true;
+      if (token.length <= 3) return false;
       if (token.includes(keyword) || keyword.includes(token)) return token.length > 2;
       return token.length > 2 && getEditDistance(token, keyword) <= 1;
     }),
@@ -154,10 +146,7 @@ function buildLocalReply(message, crowdZones, stalls, phase, userProfile) {
 }
 
 export async function getAssistantReply(message, crowdZones, stalls, phase, userProfile, language = 'English') {
-  // Security checks
   const safeMessage = sanitizeInput(message);
-  const isKeyValid = typeof apiKey === 'string' && apiKey.length > 10;
-  
   const fallbackReply = buildLocalReply(safeMessage, crowdZones, stalls, phase, userProfile);
 
   try {
@@ -171,48 +160,39 @@ export async function getAssistantReply(message, crowdZones, stalls, phase, user
     const alerts = buildAlerts(crowdZones, stalls, phase);
     const surgePrediction = predictZoneTrend(busiestZone.zone, phase);
 
-    let extraContext = '';
-    if (userProfile) {
-        extraContext = `User Location: Gate ${userProfile.gate}, Seat ${userProfile.seat}. Their main matchday goal: ${userProfile.goalLabel}.`;
-    }
-
-const systemInstruction = `You are a live Matchday Assistant for a Smart Stadium.
-IMPORTANT: You MUST reply entirely in ${language}.
-Be concise, clear, warm, and practical. Sound like a real assistant speaking to a fan, not a technical system prompt. Keep responses to 2-3 sentences max.
-If the user greets you, greet them back naturally and immediately offer 2-4 concrete things you can help with.
-If the user asks a vague question, guide them toward the next best action instead of giving a generic answer.
-Do not mention hidden system logic, JSON, algorithms, or internal implementation details unless explicitly asked.
-
-Real-Time Stadium Context:
-- Current Match Phase: ${phase}
-- Live Crowd Alerts: ${alerts.join(' | ') || 'No current alerts'}
-- Future Crowd Surge Prediction: ${surgePrediction}
-- Fastest Food Option: ${fastestStall.name} in ${fastestStall.zone} (Approx ${fastestStall.waitTime} min wait)
-- Optimal dynamically-calculated Washroom Route for this user: ${washroomRoute.steps.join(' -> ')}
-- Optimal dynamically-calculated Exit/Street Route for this user: ${exitRoute.steps.join(' -> ')}
-
-${extraContext}
-
-When a user asks for directions (washrooms, exits, food), use the optimal routes provided above. When they ask about crowd size, warn them about the surge predictions.`;
-
-    if (!ai || !isKeyValid) {
-      console.warn("API Key validation failed or GenAI offline. Falling back to local responder.");
-      return fallbackReply;
-    }
-
-    const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: safeMessage,
-        config: {
-           systemInstruction: systemInstruction,
-           temperature: 0.7,
-        }
+    const response = await fetch('/api/assistantReply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: safeMessage,
+        language,
+        context: {
+          phase,
+          alerts,
+          surgePrediction,
+          fastestStall,
+          washroomRoute: washroomRoute.steps,
+          exitRoute: exitRoute.steps,
+          userProfile: userProfile
+            ? {
+                gate: userProfile.gate,
+                seat: userProfile.seat,
+                goalLabel: userProfile.goalLabel,
+              }
+            : null,
+        },
+      }),
     });
 
-    return response.text?.trim() || fallbackReply;
+    if (!response.ok) {
+      throw new Error(`Assistant request failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.reply?.trim() || fallbackReply;
 
   } catch (err) {
-    console.error("Gemini Error:", err);
+    console.error('Assistant API error:', err);
     return fallbackReply;
   }
 }
