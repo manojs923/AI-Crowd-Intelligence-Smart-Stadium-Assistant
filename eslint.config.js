@@ -13,7 +13,14 @@ export default [
     ],
   },
   {
-    files: ['src/**/*.{js,jsx}', 'functions/**/*.js', 'vite.config.js', 'test.js', 'test-sdk.js'],
+    files: [
+      'src/**/*.{js,jsx}',
+      'api/**/*.js',
+      'server/**/*.js',
+      'vite.config.js',
+      'test.js',
+      'test-sdk.js',
+    ],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

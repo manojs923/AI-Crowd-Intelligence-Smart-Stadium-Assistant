@@ -1,4 +1,4 @@
-const endpoint = process.env.STADIUM_ASSISTANT_URL || 'http://localhost:5173/api/assistantReply';
+const endpoint = process.env.STADIUM_ASSISTANT_URL || 'http://localhost:3000/api/chat';
 
 try {
   const response = await fetch(endpoint, {

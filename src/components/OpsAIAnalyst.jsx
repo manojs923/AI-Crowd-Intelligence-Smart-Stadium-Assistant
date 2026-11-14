@@ -10,7 +10,7 @@ export default function OpsAIAnalyst({ phase, isEmergency, emergencyType, crowdZ
     const sortedZones = [...crowdZones].sort((a, b) => b.people - a.people);
 
     try {
-      const response = await fetch('/api/opsAnalysis', {
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

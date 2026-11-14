@@ -160,7 +160,7 @@ export async function getAssistantReply(message, crowdZones, stalls, phase, user
     const alerts = buildAlerts(crowdZones, stalls, phase);
     const surgePrediction = predictZoneTrend(busiestZone.zone, phase);
 
-    const response = await fetch('/api/assistantReply', {
+    const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -1,4 +1,4 @@
-const endpoint = process.env.STADIUM_OPS_URL || 'http://localhost:5173/api/opsAnalysis';
+const endpoint = process.env.STADIUM_OPS_URL || 'http://localhost:3000/api/analyze';
 
 try {
   const response = await fetch(endpoint, {
