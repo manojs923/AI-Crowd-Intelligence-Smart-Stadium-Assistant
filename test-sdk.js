@@ -1,16 +1,24 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import dotenv from 'dotenv';
-dotenv.config();
+const endpoint = process.env.STADIUM_OPS_URL || 'http://localhost:3000/api/analyze';
 
-const genAI = new GoogleGenerativeAI(process.env.VITE_GEMINI_API_KEY);
+try {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      phase: 'First Half',
+      isEmergency: false,
+      emergencyType: '',
+      crowdZones: [{ zone: 'North Gate', people: 10 }],
+    }),
+  });
 
-async function main() {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent("hello");
-    console.log("SUCCESS:", result.response.text());
-  } catch (err) {
-    console.error("ERROR:", err.message);
+  if (!response.ok) {
+    throw new Error(`Operations analysis request failed with status ${response.status}`);
   }
+
+  const result = await response.json();
+  console.log('SUCCESS:', result.analysis);
+} catch (error) {
+  console.error('ERROR:', error.message);
+  process.exitCode = 1;
 }
-main();

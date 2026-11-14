@@ -1,54 +1,44 @@
 import { useEffect, useState, useCallback } from 'react';
-import { GoogleGenAI } from '@google/genai';
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export default function OpsAIAnalyst({ phase, isEmergency, emergencyType, crowdZones }) {
   const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState(null);
 
   const generateAnalysis = useCallback(async () => {
-    if (!ai) {
-      setError("AI Services offline. Verify VITE_GEMINI_API_KEY.");
-      return;
-    }
-
     setIsAnalyzing(true);
-    setError(null);
 
     const sortedZones = [...crowdZones].sort((a, b) => b.people - a.people);
-    const criticalZones = sortedZones.slice(0, 3).map(z => `${z.zone} (${z.people} pax)`).join(', ');
-    const safestZones = sortedZones.slice(-3).map(z => `${z.zone} (${z.people} pax)`).join(', ');
-
-    const prompt = `You are the 'Tactical AI Operations Commander' for a Smart Stadium during a major match.
-    Provide a highly actionable, concise, real-time situation report (SitRep) for the venue staff.
-    
-    Current State:
-    - Match Phase: ${phase}
-    - Emergency Status: ${isEmergency ? `CRITICAL - ${emergencyType}` : 'Normal Ops'}
-    - Highest Congestion Areas: ${criticalZones}
-    - Safest/Clearest Areas: ${safestZones}
-    
-    Respond in EXACTLY 3 sections (use these exact headers):
-    1. 📊 TACTICAL SITREP: 2 sentences analyzing the current structural flow.
-    2. 🚨 IMMEDIATE ANOMALIES: 1-2 bullet points identifying the biggest risk right now.
-    3. 👥 DEPLOYMENT ORDERS: 2-3 bullet points of explicit staff movement (e.g., "Shift 5 stewards from X to Y").
-    
-    Keep it extremely terse, professional, and tactical.`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: prompt,
-        config: { temperature: 0.2 },
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phase,
+          isEmergency,
+          emergencyType,
+          crowdZones: sortedZones,
+        }),
       });
-      
-      setAnalysis(response.text);
+
+      if (!response.ok) {
+        throw new Error(`Operations analysis request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (typeof result.analysis !== 'string' || !result.analysis.trim()) {
+        throw new Error('Operations analysis response was empty');
+      }
+      setAnalysis(result.analysis);
     } catch (err) {
-      console.error(err);
-      setError("Failed to generate AI tactical analysis.");
+      console.error('Operations analysis API error:', err);
+      const busiestZone = sortedZones[0]?.zone ?? 'No zone data';
+      const clearestZone = sortedZones[sortedZones.length - 1]?.zone ?? 'No zone data';
+      setAnalysis(
+        `1. TACTICAL SITREP: Local assessment; AI is unavailable. ${busiestZone} currently has the highest reported crowd level during ${phase}.\n` +
+        `2. IMMEDIATE ANOMALIES: - ${isEmergency ? `Emergency reported: ${emergencyType}.` : `Monitor congestion near ${busiestZone}.`}\n` +
+        `3. DEPLOYMENT ORDERS: - Verify the route to ${clearestZone} is open, then direct fans there; keep stewards near ${busiestZone}.`,
+      );
     } finally {
       setIsAnalyzing(false);
     }
@@ -125,10 +115,6 @@ export default function OpsAIAnalyst({ phase, isEmergency, emergencyType, crowdZ
            <div className="flex flex-col items-center justify-center py-12 px-4 rounded-2xl border border-white/5 bg-slate-950/50">
               <div className="w-12 h-12 border-4 border-sky-500/20 border-t-sky-400 rounded-full animate-spin mb-4"></div>
               <p className="text-xs font-bold uppercase tracking-[0.15em] text-sky-300 animate-pulse">Running Neural Simulation...</p>
-           </div>
-        ) : error ? (
-           <div className="rounded-2xl border border-red-500/30 bg-red-950/50 p-6 text-center">
-              <p className="text-red-400 text-sm font-bold uppercase">{error}</p>
            </div>
         ) : analysis ? (
            <div className="animate-fade-in">

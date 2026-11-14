@@ -1,20 +1,23 @@
-import { GoogleGenAI } from '@google/genai';
-import dotenv from 'dotenv';
-dotenv.config();
+const endpoint = process.env.STADIUM_ASSISTANT_URL || 'http://localhost:3000/api/chat';
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.VITE_GEMINI_API_KEY
-});
+try {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: 'Hello',
+      language: 'English',
+      context: {},
+    }),
+  });
 
-async function main() {
-  try {
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: 'hello',
-    });
-    console.log("SUCCESS:", response.text);
-  } catch (err) {
-    console.error("ERROR:", err);
+  if (!response.ok) {
+    throw new Error(`Assistant request failed with status ${response.status}`);
   }
+
+  const result = await response.json();
+  console.log('SUCCESS:', result.reply);
+} catch (error) {
+  console.error('ERROR:', error.message);
+  process.exitCode = 1;
 }
-main();

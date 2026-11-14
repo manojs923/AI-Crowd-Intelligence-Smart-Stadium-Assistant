@@ -212,7 +212,7 @@ export function getBestRoute(destination, crowdZones, userProfile, phase = 'Firs
     let bestCost = Infinity;
 
     validExits.forEach(exitGate => {
-       const { pathZones, walkTime } = findShortestPath(startNode, exitGate, crowdZones, phase, 0.5, accessibleMode, uid);
+       const { walkTime } = findShortestPath(startNode, exitGate, crowdZones, phase, 0.5, accessibleMode, uid);
        const exitZone = crowdZones.find(z => z.zone === exitGate);
        const gateForecast = getForecastedCrowd(exitGate, exitZone.people, phase);
        const routeCost = walkTime + gateForecast; 

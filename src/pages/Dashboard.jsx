@@ -5,7 +5,6 @@ import Map from '../components/Map';
 import crowdZones from '../data/crowdData.json';
 import stalls from '../data/stallsData.json';
 import {
-  buildAlerts,
   buildSmartSuggestions,
   estimateWaitTime,
   getLiveStatus,
@@ -18,7 +17,6 @@ import { getGoalDestination, getBestRoute } from '../utils/routing';
 import { useDemoState } from '../utils/demoState';
 import { saveUserPreferences, getUserPreferences } from '../utils/firebase';
 
-const phases = ['Pre-Match', 'First Half', 'Halftime', 'Second Half', 'Post-Match'];
 const insightTone = {
   lime: 'border-lime-300/20 bg-lime-300/10 text-lime-100',
   sky: 'border-sky-300/20 bg-sky-300/10 text-sky-100',
@@ -127,7 +125,6 @@ export default function Dashboard({ userProfile, language = 'English', onResetEx
     [phase],
   );
 
-  const alerts = buildAlerts(adjustedZones, queueCards, phase);
   const smartSuggestions = buildSmartSuggestions(adjustedZones, queueCards, phase);
   const liveStatus = getLiveStatus(adjustedZones, queueCards, phase);
   const secondsAgo = Math.max(1, Math.round((Date.now() - lastUpdatedAt) / 1000));
@@ -437,7 +434,7 @@ export default function Dashboard({ userProfile, language = 'English', onResetEx
               </div>
 
               <div className="space-y-3">
-                {transportChoices.map((transport, index) => (
+                {transportChoices.map((transport) => (
                   <div
                     key={transport.zone}
                     className="flex flex-wrap items-center justify-between gap-3 rounded-[1.25rem] border border-white/10 bg-slate-950/60 p-4 transition duration-300 hover:-translate-y-1"
