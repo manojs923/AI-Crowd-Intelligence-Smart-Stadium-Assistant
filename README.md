@@ -102,7 +102,7 @@ AWS is not required for local development or the Vercel deployment. Terraform fi
 
 Prerequisites: Terraform 1.10+, AWS CLI, Docker, AWS credentials, and an existing protected S3 bucket for Terraform state (versioning and encryption enabled).
 
-For the complete showcase deployment, open **Actions → Deploy → Run workflow**. Configure GitHub secrets `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`; repository variable `AWS_TF_STATE_BUCKET`; and the manual workflow inputs for budget-alert email, region, and monthly budget. The workflow also needs the public Firebase `VITE_*` build variables.
+For the complete showcase deployment, open **Actions → AWS Showcase → Run workflow**. Configure GitHub secrets `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`; repository variable `AWS_TF_STATE_BUCKET`; and the manual workflow inputs for budget-alert email, region, and monthly budget. The workflow also needs the public Firebase `VITE_*` build variables.
 
 Local Terraform provisioning:
 
